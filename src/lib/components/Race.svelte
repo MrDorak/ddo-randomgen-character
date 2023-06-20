@@ -38,13 +38,13 @@
             Select all
         </Checkbox>
         <Checkbox checked={$hasAllFreeRaceSelected} on:change={e => toggle(e, 'free')}>
-            Select free races
+            Select all free races
         </Checkbox>
         <Checkbox checked={$hasAllPremiumRaceSelected} on:change={e => toggle(e, 'premium')}>
-            Select premium races
+            Select all premium races
         </Checkbox>
         <Checkbox checked={$hasAllIconicRaceSelected} on:change={e => toggle(e, 'iconic')}>
-            Select iconic races
+            Select all iconic races
         </Checkbox>
     </div>
     <div class="flex">

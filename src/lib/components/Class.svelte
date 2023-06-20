@@ -38,13 +38,13 @@
             Select all
         </Checkbox>
         <Checkbox checked={$hasAllFreeClassSelected} on:change={e => toggle(e, 'free')}>
-            Select free classes
+            Select all free classes
         </Checkbox>
         <Checkbox checked={$hasAllPremiumClassSelected} on:change={e => toggle(e, 'premium')}>
-            Select premium classes
+            Select all premium classes
         </Checkbox>
         <Checkbox checked={$hasAllArchetypeClassSelected} on:change={e => toggle(e, 'iconic')}>
-            Select iconic classes
+            Select all iconic classes
         </Checkbox>
     </div>
 

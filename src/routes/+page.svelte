@@ -1,12 +1,14 @@
 <script lang="ts">
     import Race from "$lib/components/Race.svelte";
     import Class from "$lib/components/Class.svelte";
+    import Alignment from "$lib/components/Alignment.svelte";
+
     import { classesSelected, racesSelected } from "../store";
 
     let raceSelector = true;
     let classSelector = true;
     let alignmentSelector = true;
-    let veteranSelector = true;
+    let startingStatsSelector = true;
 </script>
 
 <div class="md:container md:mx-auto">
@@ -38,8 +40,8 @@
                 </li>
                 <li class="w-full dark:border-gray-600">
                     <div class="flex items-center pl-3">
-                        <input id="veteran-checkbox-list" type="checkbox" bind:checked={veteranSelector} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label for="veteran-checkbox-list" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Show Veteran Status</label>
+                        <input id="starting-stats-checkbox-list" type="checkbox" bind:checked={startingStatsSelector} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="starting-stats-checkbox-list" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Show Starting Stats (defaults to 32 pts)</label>
                     </div>
                 </li>
             </ul>
@@ -53,8 +55,8 @@
 
         <Class show="{classSelector}"/>
 
-        <!--  <Race show="{alignmentSelector}"/>
+        <Alignment show="{alignmentSelector}"/>
 
-              <Race show="{veteranSelector}"/>-->
+         <!--     <Race show="{veteranSelector}"/>-->
     </div>
 </div>
