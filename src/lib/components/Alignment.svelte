@@ -56,9 +56,9 @@
         <p class="text-red-500">{$error}</p>
         {:else}
             {#if $data.alignments}
-                <div class="flex justify-center gap-3 p-2 bg-blue-300 grow text-slate-900">
+                <div class="flex justify-center gap-3 p-2 bg-blue-300 grow text-slate-900 rounded-lg">
                     {#each Object.values($data.alignments) as data}
-                        <Checkbox bind:checked={data.selected} id="free_{data.name}" on:change={handleChange}>
+                        <Checkbox bind:checked={data.selected} id="stats_{data.name}" on:change={handleChange}>
                             <span class="text-slate-900">{data.name}</span>
                         </Checkbox>
                     {/each}
@@ -67,17 +67,3 @@
         {/if}
     </div>
 </div>
-
-<style>
-    label img {
-        opacity: 50%;
-    }
-
-    :checked+label img {
-        opacity: 100%;
-    }
-
-    input[type=checkbox] {
-        display: none;
-    }
-</style>

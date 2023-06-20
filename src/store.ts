@@ -2,7 +2,7 @@ import {derived, writable} from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 
 interface Data {
-    selected: boolean;
+    selected: boolean | string;
     name: string;
 }
 
@@ -44,7 +44,7 @@ export async function fetchStore(url: string): Promise<(Writable<any> | Writable
 export const racesSelected: Readable<string> = derived(
     data,
     ($data: DataProps): string => {
-        return $data.races ? JSON.stringify(Object.values($data.races).map((values: Data[]) => values.filter((r: { selected: boolean }) => r.selected))) : ''
+        return $data.races ? JSON.stringify(Object.values($data.races).map((values: Data[]) => values.filter((r: Data) => r.selected))) : ''
     }
 );
 
@@ -72,7 +72,7 @@ export const hasAllIconicRaceSelected: Readable<DataProps> = derived(
 export const classesSelected: Readable<string> = derived(
     data,
     ($data: DataProps): string => {
-        return $data.classes ? JSON.stringify(Object.values($data.classes).map((values: Data[]) => values.filter((r: { selected: boolean }) => r.selected))) : ''
+        return $data.classes ? JSON.stringify(Object.values($data.classes).map((values: Data[]) => values.filter((r: Data) => r.selected))) : ''
     }
 );
 
@@ -100,7 +100,7 @@ export const hasAllArchetypeClassSelected: Readable<DataProps> = derived(
 export const alignmentsSelected: Readable<string> = derived(
     data,
     ($data: Alignments): string => {
-        return $data.alignments ? JSON.stringify(Object.values($data.alignments).filter((r: { selected: boolean }) => r.selected)) : ''
+        return $data.alignments ? JSON.stringify(Object.values($data.alignments).filter((r: Data) => r.selected)) : ''
     }
 );
 

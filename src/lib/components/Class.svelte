@@ -57,7 +57,7 @@
         <p class="text-red-500">{$error}</p>
         {:else }
             {#if $data.classes.free.length}
-                <div class="flex flex-col gap-2 p-2 bg-blue-300 grow">
+                <div class="flex flex-col gap-2 p-2 bg-blue-300 grow rounded-l-lg">
                     <span class="text-center text-slate-900">Free</span>
                     <div class="flex justify-center gap-2">
                         {#each Object.values($data.classes.free) as data}
@@ -87,7 +87,7 @@
                 </div>
             {/if}
             {#if $data.classes.archetype.length}
-                <div class="flex flex-col gap-2 p-2 bg-yellow-500 grow">
+                <div class="flex flex-col gap-2 p-2 bg-yellow-500 grow rounded-r-lg">
                     <span class="text-center text-slate-900">Archetype</span>
                     <div class="flex justify-center gap-2">
                         {#each Object.values($data.classes.archetype) as data}

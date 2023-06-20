@@ -2,8 +2,10 @@
     import Race from "$lib/components/Race.svelte";
     import Class from "$lib/components/Class.svelte";
     import Alignment from "$lib/components/Alignment.svelte";
+    import StartingStats from "$lib/components/StartingStats.svelte";
 
     import { classesSelected, racesSelected } from "../store";
+    import {Button, ButtonGroup} from "flowbite-svelte";
 
     let raceSelector = true;
     let classSelector = true;
@@ -41,7 +43,7 @@
                 <li class="w-full dark:border-gray-600">
                     <div class="flex items-center pl-3">
                         <input id="starting-stats-checkbox-list" type="checkbox" bind:checked={startingStatsSelector} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label for="starting-stats-checkbox-list" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Show Starting Stats (defaults to 32 pts)</label>
+                        <label for="starting-stats-checkbox-list" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Show Starting Stats (defaults to 28 pts)</label>
                     </div>
                 </li>
             </ul>
@@ -49,14 +51,17 @@
 
         <!--Selected : { $racesSelected }-->
 
-        <Race show="{raceSelector}"/>
+        <Race show="{raceSelector}" />
 
-        <!--Selected : { $classesSelected }-->
+        <Class show="{classSelector}" />
 
-        <Class show="{classSelector}"/>
+        <Alignment show="{alignmentSelector}" />
 
-        <Alignment show="{alignmentSelector}"/>
+        <StartingStats show="{startingStatsSelector}" />
 
-         <!--     <Race show="{veteranSelector}"/>-->
+        <ButtonGroup class="inline-flex rounded-lg justify-center shadow-none">
+            <Button outline color="dark">Randomize !</Button>
+            <Button outline color="dark">Clear</Button>
+        </ButtonGroup>
     </div>
 </div>
