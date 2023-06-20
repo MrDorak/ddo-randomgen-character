@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { Spinner, Checkbox } from 'flowbite-svelte';
-    import { fetchStore, hasAllFreeRaceSelected, hasAllPremiumRaceSelected, hasAllIconicRaceSelected } from '../../store'
+    import {Checkbox, Spinner} from 'flowbite-svelte';
+    import {fetchStore, hasAllFreeClassSelected, hasAllPremiumClassSelected, hasAllArchetypeClassSelected} from '../../store'
     import { writable } from "svelte/store";
 
     export let show
@@ -9,7 +9,7 @@
     let [ data, loading, error ] = [ null, writable(true), null];
 
     onMount(async () => {
-        [ data, loading, error ] = await fetchStore('races');
+        [ data, loading, error ] = await fetchStore('classes');
     })
 
     const handleChange = () => {
@@ -18,14 +18,14 @@
 
     const toggleAll = (e) => {
         data.update(data => {
-            Object.values(data.races).forEach(val => val.forEach(race => race.selected = e.target.checked));
+            Object.values(data.classes).forEach(val => val.forEach(race => race.selected = e.target.checked));
             return data
         })
     }
 
     const toggle = (e, type) => {
         data.update(data => {
-            Object.entries(data.races).forEach(([idx, val]) => idx === type ? val.forEach(race => race.selected = e.target.checked) : null);
+            Object.entries(data.classes).forEach(([idx, val]) => idx === type ? val.forEach(race => race.selected = e.target.checked) : null);
             return data
         })
     }
@@ -33,20 +33,21 @@
 
 <div class:hidden={!show} class="flex flex-col justify-center gap-2">
     <div class="flex gap-3">
-        <span class="text-orange-500 mr-2">Race Selector</span>
-        <Checkbox checked={$hasAllFreeRaceSelected && $hasAllPremiumRaceSelected && $hasAllIconicRaceSelected } on:change={e => toggleAll(e)}>
+        <span class="text-orange-500 mr-2">Class Selector</span>
+        <Checkbox checked={$hasAllFreeClassSelected && $hasAllPremiumClassSelected && $hasAllArchetypeClassSelected } on:change={e => toggleAll(e)}>
             Select all
         </Checkbox>
-        <Checkbox checked={$hasAllFreeRaceSelected} on:change={e => toggle(e, 'free')}>
-            Select free races
+        <Checkbox checked={$hasAllFreeClassSelected} on:change={e => toggle(e, 'free')}>
+            Select free classes
         </Checkbox>
-        <Checkbox checked={$hasAllPremiumRaceSelected} on:change={e => toggle(e, 'premium')}>
-            Select premium races
+        <Checkbox checked={$hasAllPremiumClassSelected} on:change={e => toggle(e, 'premium')}>
+            Select premium classes
         </Checkbox>
-        <Checkbox checked={$hasAllIconicRaceSelected} on:change={e => toggle(e, 'iconic')}>
-            Select iconic races
+        <Checkbox checked={$hasAllArchetypeClassSelected} on:change={e => toggle(e, 'iconic')}>
+            Select iconic classes
         </Checkbox>
     </div>
+
     <div class="flex">
         {#if $loading}
             <div class="text-center m-3">
@@ -54,47 +55,47 @@
             </div>
         {:else if $error}
         <p class="text-red-500">{$error}</p>
-        {:else}
-            {#if $data.races.free.length}
+        {:else }
+            {#if $data.classes.free.length}
                 <div class="flex flex-col gap-2 p-2 bg-blue-300 grow">
                     <span class="text-center text-slate-900">Free</span>
                     <div class="flex justify-center gap-2">
-                        {#each Object.values($data.races.free) as data}
+                        {#each Object.values($data.classes.free) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="free_{data.name}"
                                    on:change={handleChange}
                             />
                             <label for="free_{data.name}">
-                                <img src="images/races/free/{data.name}_race_icon.png" alt="" />
+                                <img src="images/classes/free/{data.name}_class_icon.png" alt="" />
                             </label>
                         {/each}
                     </div>
                 </div>
             {/if}
-            {#if $data.races.premium.length}
+            {#if $data.classes.premium.length}
                 <div class="flex flex-col gap-2 p-2 bg-red-500 grow">
                     <span class="text-center text-slate-900">Premium</span>
                     <div class="flex justify-center gap-2">
-                        {#each Object.values($data.races.premium) as data}
+                        {#each Object.values($data.classes.premium) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="premium_{data.name}"
                                    on:change={handleChange}
                             />
                             <label for="premium_{data.name}">
-                                <img src="images/races/premium/{data.name}_race_icon.png" alt=""/>
+                                <img src="images/classes/premium/{data.name}_class_icon.png" alt=""/>
                             </label>
                         {/each}
                     </div>
                 </div>
             {/if}
-            {#if $data.races.iconic.length}
+            {#if $data.classes.archetype.length}
                 <div class="flex flex-col gap-2 p-2 bg-yellow-500 grow">
-                    <span class="text-center text-slate-900">Iconic</span>
+                    <span class="text-center text-slate-900">Archetype</span>
                     <div class="flex justify-center gap-2">
-                        {#each Object.values($data.races.iconic) as data}
-                            <input class="hidden" bind:checked={data.selected} type="checkbox" id="iconic_{data.name}"
+                        {#each Object.values($data.classes.archetype) as data}
+                            <input class="hidden" bind:checked={data.selected} type="checkbox" id="archetype_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="iconic_{data.name}">
-                                <img src="images/races/iconic/{data.name}_race_icon.png" alt="" />
+                            <label for="archetype_{data.name}">
+                                <img src="images/classes/archetype/{data.name}_class_icon.png" alt="" />
                             </label>
                         {/each}
                     </div>

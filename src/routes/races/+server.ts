@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 
-const free_races: string[] = [];
-const premium_races: string[] = ["aasimar", "gnome"];
-const iconic_races: string[] = ["bladeforged"];
+const free_races: string[] = ["dragonborn", "drow", "dwarf", "elf", "gnome", "half_elf", "halfling", "half_orc", "human", "tiefling", "warforged", "wood_elf"];
+const premium_races: string[] = ["aasimar", "shifter", "tabaxi"];
+const iconic_races: string[] = ["aasimar_scourge", "bladeforged", "deep_gnome", "morninglord", "purple_dragon_knight", "shadar_kai", "tiefling_scoundrel", "trailblazer"];
 
 export function GET(): Response {
     const races: {
