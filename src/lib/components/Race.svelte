@@ -32,8 +32,8 @@
 </script>
 
 <div class:hidden={!show} class="flex flex-col justify-center gap-2">
-    <div class="flex gap-3">
-        <span class="text-orange-500 mr-2">Race Selector</span>
+    <span class="text-orange-500 mr-2">Race Selector</span>
+    <div class="flex flex-wrap gap-3">
         <Checkbox checked={$hasAllFreeRaceSelected && $hasAllPremiumRaceSelected && $hasAllIconicRaceSelected } on:change={e => toggleAll(e)}>
             Select all
         </Checkbox>
@@ -58,7 +58,7 @@
             {#if $data.races.free.length}
                 <div class="flex flex-col gap-2 p-2 bg-blue-300 grow rounded-l-lg">
                     <span class="text-center text-slate-900">Free</span>
-                    <div class="flex justify-center gap-2">
+                    <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.races.free) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="free_{data.name}"
                                    on:change={handleChange}
@@ -73,7 +73,7 @@
             {#if $data.races.premium.length}
                 <div class="flex flex-col gap-2 p-2 bg-red-500 grow">
                     <span class="text-center text-slate-900">Premium</span>
-                    <div class="flex justify-center gap-2">
+                    <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.races.premium) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="premium_{data.name}"
                                    on:change={handleChange}
@@ -88,7 +88,7 @@
             {#if $data.races.iconic.length}
                 <div class="flex flex-col gap-2 p-2 bg-yellow-500 grow rounded-r-lg">
                     <span class="text-center text-slate-900">Iconic</span>
-                    <div class="flex justify-center gap-2">
+                    <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.races.iconic) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="iconic_{data.name}"
                                    on:change={handleChange}

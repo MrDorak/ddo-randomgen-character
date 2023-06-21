@@ -30,7 +30,7 @@
         <p class="text-red-500">{$error}</p>
         {:else}
             {#if $data.stats}
-                <div class="flex justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+                <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
                     {#each Object.values($data.stats) as data}
                         <div class="flex items-center pl-3">
                             <input id="stats_{data.name}" type="radio" bind:group={$selectedStartingStats} value="{data.name}" on:click={handleChange}

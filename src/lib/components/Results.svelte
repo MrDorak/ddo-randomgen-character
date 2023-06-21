@@ -219,7 +219,7 @@
 <div class="flex flex-col justify-center gap-5">
     <div class="flex flex-col justify-center gap-2">
         <span class="text-orange-500 mr-2">Number of multiclass</span>
-        <div class="flex justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+        <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
             <div class="flex items-center pl-3">
                 <input id="checkbox_1" type="checkbox" bind:group={numberGen} value="{1}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                 <label for="checkbox_1" class="w-full ml-2 text-sm font-medium">1 class</label>
@@ -246,7 +246,7 @@
                 Loading <Spinner></Spinner>
             </div>
         {:else}
-            <Table divClass="w-full h-[426px] overflow-auto rounded-lg" hoverable={true}>
+            <Table divClass="w-full h-[426px] overflow-auto rounded-lg flex-wrap" hoverable={true}>
                 <TableHead>
                     <TableHeadCell>Alignment</TableHeadCell>
                     <TableHeadCell>Race</TableHeadCell>

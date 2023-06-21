@@ -38,8 +38,8 @@
 </script>
 
 <div class:hidden={!show} class="flex flex-col justify-center gap-2">
-    <div class="flex gap-3">
-        <span class="text-orange-500 mr-2">Alignment Selector</span>
+    <span class="text-orange-500 mr-2">Alignment Selector</span>
+    <div class="flex flex-wrap gap-3">
         <Checkbox checked={$hasAllLawfulAlignmentsSelected && $hasAllNeutralAlignmentsSelected && $hasAllChaoticAlignmentsSelected } on:change={e => toggleAll(e)}>
             Select all
         </Checkbox>
@@ -62,7 +62,7 @@
         <p class="text-red-500">{$error}</p>
         {:else}
             {#if $data.alignments}
-                <div class="flex justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+                <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
                     {#each Object.values($data.alignments) as data}
                         <div class="flex items-center pl-3">
                             <input id="alignments_{data.name}" type="checkbox" bind:checked={data.selected} value="{data.name}" on:click={handleChange}

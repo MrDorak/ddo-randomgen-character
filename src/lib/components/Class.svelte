@@ -32,8 +32,8 @@
 </script>
 
 <div class:hidden={!show} class="flex flex-col justify-center gap-2">
-    <div class="flex gap-3">
-        <span class="text-orange-500 mr-2">Class Selector</span>
+    <span class="text-orange-500 mr-2">Class Selector</span>
+    <div class="flex flex-wrap gap-3">
         <Checkbox checked={$hasAllFreeClassSelected && $hasAllPremiumClassSelected && $hasAllArchetypeClassSelected } on:change={e => toggleAll(e)}>
             Select all
         </Checkbox>
@@ -59,7 +59,7 @@
             {#if $data.classes.free.length}
                 <div class="flex flex-col gap-2 p-2 bg-blue-300 grow rounded-l-lg">
                     <span class="text-center text-slate-900">Free</span>
-                    <div class="flex justify-center gap-2">
+                    <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.classes.free) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="free_{data.name}"
                                    on:change={handleChange}
@@ -74,7 +74,7 @@
             {#if $data.classes.premium.length}
                 <div class="flex flex-col gap-2 p-2 bg-red-500 grow">
                     <span class="text-center text-slate-900">Premium</span>
-                    <div class="flex justify-center gap-2">
+                    <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.classes.premium) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="premium_{data.name}"
                                    on:change={handleChange}
@@ -89,7 +89,7 @@
             {#if $data.classes.archetype.length}
                 <div class="flex flex-col gap-2 p-2 bg-yellow-500 grow rounded-r-lg">
                     <span class="text-center text-slate-900">Archetype</span>
-                    <div class="flex justify-center gap-2">
+                    <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.classes.archetype) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="archetype_{data.name}"
                                    on:change={handleChange}
