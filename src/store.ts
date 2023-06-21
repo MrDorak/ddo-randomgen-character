@@ -1,7 +1,8 @@
 import {derived, writable} from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
+import type {Race} from "./routes/races/+server";
 
-interface Data {
+interface Data extends Race{
     selected: boolean | string;
     name: string;
     alias?: string;

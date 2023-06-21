@@ -11,6 +11,7 @@
         racesSelected,
         classesSelected,
         alignmentsSelected,
+        selectedStartingStats,
         data
     } from '../../store'
 
@@ -21,38 +22,44 @@
     const min = 1;
 
     let results = [];
+    const starting_stats = [
+        {name: 'STR', value: 8},
+        {name: 'DEX', value: 8},
+        {name: 'CON', value: 8},
+        {name: 'INT', value: 8},
+        {name: 'WIS', value: 8},
+        {name: 'CHA', value: 8},
+    ];
 
     const handleClick = () => {
-        const chosenRace = $racesSelected[Math.floor(Math.random() * $racesSelected.length)].name;
+        const chosenRace = $racesSelected[Math.floor(Math.random() * $racesSelected.length)];
 
-        let forced_class = '';
-        // ["aasimar_scourge", "bladeforged", "deep_gnome", "morninglord", "purple_dragon_knight", "shadar_kai", "tiefling_scoundrel", "trailblazer"]
-        switch (chosenRace) {
-            case 'aasimar_scourge':
-                forced_class = 'ranger'
-                break;
-            case 'bladeforged':
-                forced_class = 'paladin'
-                break;
-            case 'deep_gnome':
-                forced_class = 'wizard'
-                break;
-            case 'morninglord':
-                forced_class = 'cleric'
-                break;
-            case 'purple_dragon_knight':
-                forced_class = 'fighter'
-                break;
-            case 'tiefling_scoundrel':
-                forced_class = 'bard'
-                break;
-            case 'trailblazer':
-                forced_class = 'monk'
-                break;
-            case 'razorclaw':
-                forced_class = 'barbarian'
-                break;
-            default: break;
+        // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
+        let chosenStats = JSON.parse(JSON.stringify(starting_stats));
+        let startingStats = chosenRace.name === 'drow' && $selectedStartingStats !== '28' ? $selectedStartingStats - 4 : $selectedStartingStats;
+        
+        for (let pts = 1; pts <= startingStats; pts++) {
+            let ability;
+            let idx = Math.floor(Math.random() * chosenStats.length);
+            while ((ability = chosenStats[idx].value) === 18) {
+                idx = Math.floor(Math.random() * chosenStats.length);
+            }
+
+            if (ability >= 14 && ability < 16) {
+                pts += 1; // costs 2 total
+            } else if (ability >= 16) {
+                pts += 2; // costs 3 total
+            }
+            chosenStats[idx].value++;
+        }
+
+        console.log(chosenRace.statsMod);
+        if (chosenRace.statsMod) {
+            Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
+                changes.forEach(incr => {
+                    chosenStats[chosenStats.findIndex(stat => stat.name === incr.name)].value += idx === "increasedStats" ? incr.value : -incr.value
+                })
+            });
         }
 
         let classesCopy = $classesSelected;
@@ -93,8 +100,8 @@
         let totalLvls = 20;
         let levels, name;
         for (let i = 1; i <= numberClasses; i++) {
-            if (i === 1 && forced_class.length > 0) {
-                name = forced_class;
+            if (i === 1 && chosenRace.forcedClass?.length > 0) {
+                name = chosenRace.forcedClass;
             } else {
                 name = classesCopy[Math.floor(Math.random() * classesCopy.length)].name;
             }
@@ -184,9 +191,10 @@
         chosenClasses = chosenClasses.sort((a,b) => b.levels - a.levels)
 
         results = [{
-            race: chosenRace,
+            race: chosenRace.name,
             alignment: chosenAlignment.name,
-            classes: chosenClasses
+            classes: chosenClasses,
+            stats: chosenStats
         }, ...results]
     }
 
@@ -216,19 +224,20 @@
         <Button outline color="dark">Clear</Button>
     </ButtonGroup>
 
-    <div class="flex">
+    <div class="flex mb-5">
         {#if loading}
             <div class="text-center m-3">
                 Loading <Spinner></Spinner>
             </div>
         {:else}
-            <Table divClass="w-full mb-3 h-[426px] overflow-auto" hoverable={true}>
+            <Table divClass="w-full h-[426px] overflow-auto" hoverable={true}>
                 <TableHead>
                     <TableHeadCell>Alignment</TableHeadCell>
                     <TableHeadCell>Race</TableHeadCell>
                     <TableHeadCell>Class 1</TableHeadCell>
                     <TableHeadCell>Class 2</TableHeadCell>
                     <TableHeadCell>Class 3</TableHeadCell>
+                    <TableHeadCell>Stats</TableHeadCell>
                 </TableHead>
                 <TableBody class="divide-y">
                     {#each results as item}
@@ -238,6 +247,9 @@
                             {#each Array(3) as _, index(index)}
                                 <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name.replaceAll("_", " ")}` : '-'}</TableBodyCell>
                             {/each}
+                            <TableBodyCell>
+                                {item.stats.map(stat => `${stat.name}: ${stat.value}`).join(" - ")}
+                            </TableBodyCell>
                         </TableBodyRow>
                     {/each}
                 </TableBody>

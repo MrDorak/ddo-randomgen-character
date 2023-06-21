@@ -13,7 +13,6 @@
     })
 
     const handleChange = () => {
-        console.log('test');
         data.set($data)
     }
 </script>
