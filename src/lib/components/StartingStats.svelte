@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import {Spinner, Radio} from 'flowbite-svelte';
-    import { fetchStore } from '../../store'
+    import { Spinner, Radio } from 'flowbite-svelte';
+    import { fetchStore, selectedStartingStats } from '../../store'
     import { writable } from "svelte/store";
 
     export let show
@@ -31,9 +31,9 @@
         <p class="text-red-500">{$error}</p>
         {:else}
             {#if $data.stats}
-                <div class="flex justify-center gap-3 p-2 bg-blue-300 grow text-slate-900 rounded-lg">
+                <div class="flex justify-center gap-3 p-2 bg-green-300 grow text-slate-900 rounded-lg">
                     {#each Object.values($data.stats) as data}
-                        <Radio name="stats" bind:group={data.selected} value="{data.name}" id="stats_{data.name}" on:click={handleChange}>
+                        <Radio name="stats" bind:group={$selectedStartingStats} value="{data.name}" id="stats_{data.name}" on:click={handleChange}>
                             <span class="text-slate-900">{data.name} pts</span>
                         </Radio>
                     {/each}

@@ -4,10 +4,11 @@ import type { Writable, Readable } from 'svelte/store';
 interface Data {
     selected: boolean | string;
     name: string;
+    alias?: string;
 }
 
 interface DataProps {
-    [index: string]: Array<Array<Data>>;
+    [index: string]: Data[][];
 }
 
 interface Alignments {
@@ -15,6 +16,8 @@ interface Alignments {
 }
 
 export let data: Writable<any> = writable({})
+
+export let selectedStartingStats: Writable<any> = writable('28')
 
 export async function fetchStore(url: string): Promise<(Writable<any> | Writable<boolean> | (() => Promise<void>))[]> {
     const loading: Writable<boolean> = writable(false)
@@ -41,10 +44,19 @@ export async function fetchStore(url: string): Promise<(Writable<any> | Writable
     return [ data, loading, error, get]
 }
 
-export const racesSelected: Readable<string> = derived(
+export const racesSelected: Readable<Data[]> = derived(
     data,
-    ($data: DataProps): string => {
-        return $data.races ? JSON.stringify(Object.values($data.races).map((values: Data[]) => values.filter((r: Data) => r.selected))) : ''
+    ($data: DataProps): Data[] => {
+        if (!$data.races) {
+            return []
+        }
+
+        let selected = Object.values($data.races).flatMap((values: Data[]) => values.filter((r: Data) => r.selected));
+        if (selected.length === 0) {
+            return Object.values($data.races).flatMap((values: Data[]) => values)
+        }
+
+        return selected
     }
 );
 
@@ -69,10 +81,19 @@ export const hasAllIconicRaceSelected: Readable<DataProps> = derived(
     }
 );
 
-export const classesSelected: Readable<string> = derived(
+export const classesSelected: Readable<Data[]> = derived(
     data,
-    ($data: DataProps): string => {
-        return $data.classes ? JSON.stringify(Object.values($data.classes).map((values: Data[]) => values.filter((r: Data) => r.selected))) : ''
+    ($data: DataProps): Data[] => {
+        if (!$data.classes) {
+            return []
+        }
+
+        let selected = Object.values($data.classes).flatMap((values: Data[]) => values.filter((r: Data) => r.selected));
+        if (selected.length === 0) {
+            return Object.values($data.classes).flatMap((values: Data[]) => values)
+        }
+
+        return selected
     }
 );
 
@@ -97,10 +118,19 @@ export const hasAllArchetypeClassSelected: Readable<DataProps> = derived(
     }
 );
 
-export const alignmentsSelected: Readable<string> = derived(
+export const alignmentsSelected: Readable<Data[]> = derived(
     data,
-    ($data: Alignments): string => {
-        return $data.alignments ? JSON.stringify(Object.values($data.alignments).filter((r: Data) => r.selected)) : ''
+    ($data: Alignments): Data[] => {
+        if (!$data.alignments) {
+            return []
+        }
+
+        let selected = Object.values($data.alignments).filter((r: Data) => r.selected)
+        if (selected.length === 0) {
+            return Object.values($data.alignments)
+        }
+
+        return selected
     }
 );
 

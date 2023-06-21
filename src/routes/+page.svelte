@@ -1,11 +1,10 @@
 <script lang="ts">
+    import {Button, ButtonGroup} from "flowbite-svelte";
     import Race from "$lib/components/Race.svelte";
     import Class from "$lib/components/Class.svelte";
     import Alignment from "$lib/components/Alignment.svelte";
     import StartingStats from "$lib/components/StartingStats.svelte";
-
-    import { classesSelected, racesSelected } from "../store";
-    import {Button, ButtonGroup} from "flowbite-svelte";
+    import Results from "$lib/components/Results.svelte";
 
     let raceSelector = true;
     let classSelector = true;
@@ -59,9 +58,6 @@
 
         <StartingStats show="{startingStatsSelector}" />
 
-        <ButtonGroup class="inline-flex rounded-lg justify-center shadow-none">
-            <Button outline color="dark">Randomize !</Button>
-            <Button outline color="dark">Clear</Button>
-        </ButtonGroup>
+        <Results></Results>
     </div>
 </div>
