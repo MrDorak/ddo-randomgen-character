@@ -31,39 +31,14 @@
         {name: 'CHA', value: 8},
     ];
 
+    const getStatMod = (stat) => {
+        return Math.floor((stat / 2) - 5)
+    }
+
     const handleClick = () => {
-        const chosenRace = $racesSelected[Math.floor(Math.random() * $racesSelected.length)];
-
-        // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
-        let chosenStats = JSON.parse(JSON.stringify(starting_stats));
-        let startingStats = chosenRace.name === 'drow' && $selectedStartingStats !== '28' ? $selectedStartingStats - 4 : $selectedStartingStats;
-        
-        for (let pts = 1; pts <= startingStats; pts++) {
-            let ability;
-            let idx = Math.floor(Math.random() * chosenStats.length);
-            while ((ability = chosenStats[idx].value) === 18) {
-                idx = Math.floor(Math.random() * chosenStats.length);
-            }
-
-            if (ability >= 14 && ability < 16) {
-                pts += 1; // costs 2 total
-            } else if (ability >= 16) {
-                pts += 2; // costs 3 total
-            }
-            chosenStats[idx].value++;
-        }
-
-        console.log(chosenRace.statsMod);
-        if (chosenRace.statsMod) {
-            Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
-                changes.forEach(incr => {
-                    chosenStats[chosenStats.findIndex(stat => stat.name === incr.name)].value += idx === "increasedStats" ? incr.value : -incr.value
-                })
-            });
-        }
-
         let classesCopy = $classesSelected;
-        
+
+        console.log(classesCopy);
         const chosenAlignment = $alignmentsSelected[Math.floor(Math.random() * $alignmentsSelected.length)];
 
         switch (chosenAlignment.alias) {
@@ -94,8 +69,47 @@
                 break;
         }
 
+        if (classesCopy.length === 0) {
+            return;
+        }
+
+        let raceIdx = Math.floor(Math.random() * $racesSelected.length);
+        let chosenRace = $racesSelected[raceIdx];
+
+        while (!classesCopy.some(e => e.name === chosenRace?.forcedClass)) {
+            raceIdx = Math.floor(Math.random() * $racesSelected.length);
+            chosenRace = $racesSelected[raceIdx]
+        }
+
+        // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
+        let chosenStats = JSON.parse(JSON.stringify(starting_stats));
+        let startingStats = chosenRace.name === 'drow' && $selectedStartingStats !== '28' ? $selectedStartingStats - 4 : $selectedStartingStats;
+        
+        for (let pts = 1; pts <= startingStats; pts++) {
+            let ability;
+            let idx = Math.floor(Math.random() * chosenStats.length);
+            while ((ability = chosenStats[idx].value) === 18) {
+                idx = Math.floor(Math.random() * chosenStats.length);
+            }
+
+            if (ability >= 14 && ability < 16) {
+                pts += 1; // costs 2 total
+            } else if (ability >= 16) {
+                pts += 2; // costs 3 total
+            }
+            chosenStats[idx].value++;
+        }
+
+        if (chosenRace.statsMod) {
+            Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
+                changes.forEach(incr => {
+                    chosenStats[chosenStats.findIndex(stat => stat.name === incr.name)].value += idx === "increasedStats" ? incr.value : -incr.value
+                })
+            });
+        }
+
         // use input data unless nothing is selected where we use the default 1-3 range
-        const numberClasses = numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (max - min + 1) + min)
+        const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (max - min + 1) + min), classesCopy.length)
         let chosenClasses = [];
         let totalLvls = 20;
         let levels, name;
@@ -104,19 +118,6 @@
                 name = chosenRace.forcedClass;
             } else {
                 name = classesCopy[Math.floor(Math.random() * classesCopy.length)].name;
-            }
-
-            if (i > 1) {
-                // if this is the last level, we dump all the levels remaining
-                if (i === numberClasses) {
-                    levels = totalLvls;
-                } else {
-                    levels = Math.floor(Math.random() * (totalLvls - (numberClasses - i + 1)) + 1);
-                }
-            } else if (numberClasses === 1) {
-                levels = 20;
-            } else {
-                levels = Math.floor(Math.random() * ((totalLvls - numberClasses) - 1 + 1) + 1);
             }
 
             // paladins/sacred fist cant multiclass with : bard, barbarian, druid, and acolyte of the skin
@@ -176,6 +177,19 @@
 
                 default: break;
             }
+
+            if (i > 1) {
+                // if this is the last level, we dump all the levels remaining
+                if (i === numberClasses) {
+                    levels = totalLvls;
+                } else {
+                    levels = Math.floor(Math.random() * (totalLvls - (numberClasses - i + 1)) + 1);
+                }
+            } else if (numberClasses === 1 || classesCopy.length === 0) {
+                levels = 20;
+            } else {
+                levels = Math.floor(Math.random() * ((totalLvls - numberClasses) - 1 + 1) + 1);
+            }
             
             totalLvls -= levels;
             chosenClasses[i - 1] = {
@@ -197,7 +211,6 @@
             stats: chosenStats
         }, ...results]
     }
-
 </script>
 
 <div class="flex flex-col justify-center gap-5">
@@ -248,7 +261,7 @@
                                 <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name.replaceAll("_", " ")}` : '-'}</TableBodyCell>
                             {/each}
                             <TableBodyCell>
-                                {item.stats.map(stat => `${stat.name}: ${stat.value}`).join(" - ")}
+                                {@html item.stats.map(stat => `${stat.name}: ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
                             </TableBodyCell>
                         </TableBodyRow>
                     {/each}
