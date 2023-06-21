@@ -43,8 +43,8 @@
         <Checkbox checked={$hasAllPremiumClassSelected} on:change={e => toggle(e, 'premium')}>
             Select all premium classes
         </Checkbox>
-        <Checkbox checked={$hasAllArchetypeClassSelected} on:change={e => toggle(e, 'iconic')}>
-            Select all iconic classes
+        <Checkbox checked={$hasAllArchetypeClassSelected} on:change={e => toggle(e, 'archetype')}>
+            Select all archetype classes
         </Checkbox>
     </div>
 

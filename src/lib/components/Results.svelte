@@ -79,15 +79,24 @@
         let raceIdx = Math.floor(Math.random() * $racesSelected.length);
         let chosenRace = $racesSelected[raceIdx];
 
-        while (!classesCopy.some(e => e.name === chosenRace?.forcedClass)) {
-            raceIdx = Math.floor(Math.random() * $racesSelected.length);
-            chosenRace = $racesSelected[raceIdx]
+        if (chosenRace?.forcedClass) {
+            while (!classesCopy.some(e => e.name === chosenRace?.forcedClass)) {
+                raceIdx = Math.floor(Math.random() * $racesSelected.length);
+                chosenRace = $racesSelected[raceIdx]
+            }
         }
 
         // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
         let chosenStats = JSON.parse(JSON.stringify(starting_stats));
-        let startingStats = chosenRace.name === 'drow' && $selectedStartingStats !== '28' ? $selectedStartingStats - 4 : $selectedStartingStats;
+        let startingStats = $selectedStartingStats;
+        if (chosenRace.name === 'drow' && $selectedStartingStats !== '28') {
+            startingStats = $selectedStartingStats - 4;
+        } else if (chosenRace.isIconic && $selectedStartingStats === '28') {
+            startingStats = '32'
+        }
         
+        console.log(startingStats);
+
         for (let pts = 1; pts <= startingStats; pts++) {
             let ability;
             let idx = Math.floor(Math.random() * chosenStats.length);
