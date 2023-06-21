@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
 
+export const prerender = true
+
 const stats_list: string[] = ["28", "32", "34", "36"];
 
 export function GET(): Response {

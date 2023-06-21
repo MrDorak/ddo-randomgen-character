@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
 
+export const prerender = true
+
 const alignments_list: string[] = [
     "lawful good", "lawful neutral", "neutral good", "true neutral", "chaotic good", "chaotic neutral"];
 

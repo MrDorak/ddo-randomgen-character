@@ -252,7 +252,7 @@
                     <TableHeadCell>Class 3</TableHeadCell>
                     <TableHeadCell>Stats</TableHeadCell>
                 </TableHead>
-                <TableBody class="divide-y">
+                <TableBody>
                     {#each results as item}
                         <TableBodyRow>
                             <TableBodyCell>{item.alignment}</TableBodyCell>

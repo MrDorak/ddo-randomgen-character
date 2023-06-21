@@ -1,5 +1,4 @@
 <script lang="ts">
-    import {Button, ButtonGroup} from "flowbite-svelte";
     import Race from "$lib/components/Race.svelte";
     import Class from "$lib/components/Class.svelte";
     import Alignment from "$lib/components/Alignment.svelte";
