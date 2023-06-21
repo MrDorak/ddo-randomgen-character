@@ -35,10 +35,13 @@
         return Math.floor((stat / 2) - 5)
     }
 
+    const clearResults = () => {
+        results = [];
+    }
+
     const handleClick = () => {
         let classesCopy = $classesSelected;
 
-        console.log(classesCopy);
         const chosenAlignment = $alignmentsSelected[Math.floor(Math.random() * $alignmentsSelected.length)];
 
         switch (chosenAlignment.alias) {
@@ -218,23 +221,23 @@
         <span class="text-orange-500 mr-2">Number of multiclass</span>
         <div class="flex justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
             <div class="flex items-center pl-3">
-                <input id="checkbox-1" type="checkbox" bind:group={numberGen} value="{1}" class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox-1" class="w-full ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">1 class</label>
+                <input id="checkbox_1" type="checkbox" bind:group={numberGen} value="{1}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                <label for="checkbox_1" class="w-full ml-2 text-sm font-medium">1 class</label>
             </div>
             <div class="flex items-center pl-3">
-                <input id="checkbox-2" type="checkbox" bind:group={numberGen} value="{2}" class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox-2" class="w-full ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">2 classes</label>
+                <input id="checkbox_2" type="checkbox" bind:group={numberGen} value="{2}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                <label for="checkbox_2" class="w-full ml-2 text-sm font-medium">2 classes</label>
             </div>
             <div class="flex items-center pl-3">
-                <input id="checkbox-3" type="checkbox" bind:group={numberGen} value="{3}" class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox-3" class="w-full ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">3 classes</label>
+                <input id="checkbox_3" type="checkbox" bind:group={numberGen} value="{3}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                <label for="checkbox_3" class="w-full ml-2 text-sm font-medium">3 classes</label>
             </div>
         </div>
     </div>
 
     <ButtonGroup class="rounded-lg justify-center shadow-none">
-        <Button outline color="dark" disabled={ !$data } on:click={ handleClick }>Randomize !</Button>
-        <Button outline color="dark">Clear</Button>
+        <Button outline color="blue" disabled={ !$data } on:click={ handleClick }>Randomize !</Button>
+        <Button outline color="red" disabled={ !$data || !results.length } on:click={ clearResults }>Clear</Button>
     </ButtonGroup>
 
     <div class="flex mb-5">
@@ -243,7 +246,7 @@
                 Loading <Spinner></Spinner>
             </div>
         {:else}
-            <Table divClass="w-full h-[426px] overflow-auto" hoverable={true}>
+            <Table divClass="w-full h-[426px] overflow-auto rounded-lg" hoverable={true}>
                 <TableHead>
                     <TableHeadCell>Alignment</TableHeadCell>
                     <TableHeadCell>Race</TableHeadCell>

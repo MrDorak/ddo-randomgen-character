@@ -1,7 +1,13 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { Spinner, Checkbox } from 'flowbite-svelte';
-    import { fetchStore, hasAllLawfulAlignmentsSelected, hasAllNeutralAlignmentsSelected, hasAllChaoticAlignmentsSelected } from '../../store'
+    import {
+        fetchStore,
+        hasAllLawfulAlignmentsSelected,
+        hasAllNeutralAlignmentsSelected,
+        hasAllChaoticAlignmentsSelected,
+        selectedStartingStats
+    } from '../../store'
     import { writable } from "svelte/store";
 
     export let show
@@ -56,11 +62,13 @@
         <p class="text-red-500">{$error}</p>
         {:else}
             {#if $data.alignments}
-                <div class="flex justify-center gap-3 p-2 bg-blue-300 grow text-slate-900 rounded-lg">
+                <div class="flex justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
                     {#each Object.values($data.alignments) as data}
-                        <Checkbox bind:checked={data.selected} id="stats_{data.name}" on:change={handleChange}>
-                            <span class="text-slate-900">{data.name}</span>
-                        </Checkbox>
+                        <div class="flex items-center pl-3">
+                            <input id="alignments_{data.name}" type="checkbox" bind:checked={data.selected} value="{data.name}" on:click={handleChange}
+                                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="alignments_{data.name}" class="w-full ml-2 text-sm font-medium">{data.name}</label>
+                        </div>
                     {/each}
                 </div>
             {/if}
