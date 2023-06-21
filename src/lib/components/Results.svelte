@@ -22,7 +22,7 @@
     const min = 1;
 
     let results = [];
-    const starting_stats = [
+    const base_stats = [
         {name: 'STR', value: 8},
         {name: 'DEX', value: 8},
         {name: 'CON', value: 8},
@@ -87,15 +87,13 @@
         }
 
         // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
-        let chosenStats = JSON.parse(JSON.stringify(starting_stats));
+        let chosenStats = JSON.parse(JSON.stringify(base_stats));
         let startingStats = $selectedStartingStats;
         if (chosenRace.name === 'drow' && $selectedStartingStats !== '28') {
             startingStats = $selectedStartingStats - 4;
         } else if (chosenRace.isIconic && $selectedStartingStats === '28') {
             startingStats = '32'
         }
-        
-        console.log(startingStats);
 
         for (let pts = 1; pts <= startingStats; pts++) {
             let ability;
