@@ -15,20 +15,20 @@
         data
     } from '../../store'
 
-
     let numberGen = [1, 2, 3];
     let loading = false;
+    let weight = true;
     const max = 3;
     const min = 1;
 
     let results = [];
     const base_stats = [
-        {name: 'STR', value: 8},
-        {name: 'DEX', value: 8},
-        {name: 'CON', value: 8},
-        {name: 'INT', value: 8},
-        {name: 'WIS', value: 8},
-        {name: 'CHA', value: 8},
+        {name: 'STR', value: 8, weight: 1},
+        {name: 'DEX', value: 8, weight: 1},
+        {name: 'CON', value: 8, weight: 1},
+        {name: 'INT', value: 8, weight: 1},
+        {name: 'WIS', value: 8, weight: 1},
+        {name: 'CHA', value: 8, weight: 1},
     ];
 
     const getStatMod = (stat) => {
@@ -86,48 +86,20 @@
             }
         }
 
-        // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
-        let chosenStats = JSON.parse(JSON.stringify(base_stats));
-        let startingStats = $selectedStartingStats;
-        if (chosenRace.name === 'drow' && $selectedStartingStats !== '28') {
-            startingStats = $selectedStartingStats - 4;
-        } else if (chosenRace.isIconic && $selectedStartingStats === '28') {
-            startingStats = '32'
-        }
-
-        for (let pts = 1; pts <= startingStats; pts++) {
-            let ability;
-            let idx = Math.floor(Math.random() * chosenStats.length);
-            while ((ability = chosenStats[idx].value) === 18) {
-                idx = Math.floor(Math.random() * chosenStats.length);
-            }
-
-            if (ability >= 14 && ability < 16) {
-                pts += 1; // costs 2 total
-            } else if (ability >= 16) {
-                pts += 2; // costs 3 total
-            }
-            chosenStats[idx].value++;
-        }
-
-        if (chosenRace.statsMod) {
-            Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
-                changes.forEach(incr => {
-                    chosenStats[chosenStats.findIndex(stat => stat.name === incr.name)].value += idx === "increasedStats" ? incr.value : -incr.value
-                })
-            });
-        }
-
         // use input data unless nothing is selected where we use the default 1-3 range
         const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (max - min + 1) + min), classesCopy.length)
         let chosenClasses = [];
         let totalLvls = 20;
         let levels, name;
         for (let i = 1; i <= numberClasses; i++) {
+            let weightedStats;
             if (i === 1 && chosenRace.forcedClass?.length > 0) {
                 name = chosenRace.forcedClass;
+                weightedStats = classesCopy.find(classes => classes.name === name).weightedStats
             } else {
-                name = classesCopy[Math.floor(Math.random() * classesCopy.length)].name;
+                const classIdx = Math.floor(Math.random() * classesCopy.length);
+                name = classesCopy[classIdx].name;
+                weightedStats = classesCopy[classIdx].weightedStats
             }
 
             // paladins/sacred fist cant multiclass with : bard, barbarian, druid, and acolyte of the skin
@@ -204,7 +176,8 @@
             totalLvls -= levels;
             chosenClasses[i - 1] = {
                 name,
-                levels
+                levels,
+                weightedStats
             }
 
             classesCopy = classesCopy.filter(function( _class ) {
@@ -213,7 +186,67 @@
         }
 
         chosenClasses = chosenClasses.sort((a,b) => b.levels - a.levels)
+        
+        // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
+        let chosenStats = JSON.parse(JSON.stringify(base_stats));
+        let startingStats = $selectedStartingStats;
+        if (chosenRace.name === 'drow' && $selectedStartingStats !== '28') {
+            startingStats = $selectedStartingStats - 4;
+        } else if (chosenRace.isIconic && $selectedStartingStats === '28') {
+            startingStats = '32'
+        }
 
+        console.log(weight);
+        if (weight) {
+            chosenClasses.map(_class => {
+                _class.weightedStats.forEach(stat => {
+                    const statIndex = chosenStats.findIndex(baseStat => baseStat.name === stat.name)
+                    chosenStats[statIndex].weight += (stat.value - 1)
+                })
+            })
+        }
+
+        const cumulativeWeights = [];
+        for (let i = 0; i < chosenStats.length; i += 1) {
+            cumulativeWeights[i] = chosenStats[i].weight + (cumulativeWeights[i - 1] || 0);
+        }
+        const maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
+
+        // allocate stat points
+        for (var pts = 1; pts < startingStats; pts++) {
+            const randomNumber = maxCumulativeWeight * Math.random();
+
+            let ability;
+
+            // apply weight
+            for (let itemIndex = 0; itemIndex < chosenStats.length; itemIndex += 1) {
+                if (chosenStats[itemIndex].value === 18) {
+                    continue;
+                }
+
+                if (cumulativeWeights[itemIndex] >= randomNumber) {
+                    ability = chosenStats[itemIndex].value
+                    if (ability >= 14 && ability < 16) {
+                        if ((startingStats - pts) < 2) continue;
+                        pts += 1; // costs 2 total
+                    } else if (ability >= 16) {
+                        if (startingStats - pts < 3) continue;
+                        pts += 2; // costs 3 total
+                    }
+                    chosenStats[itemIndex].value++;
+                    break;
+                }
+            }
+        }
+
+        if (chosenRace.statsMod) {
+            Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
+                changes.forEach(incr => {
+                    chosenStats[chosenStats.findIndex(stat => stat.name === incr.name)].value += idx === "increasedStats" ? incr.value : -incr.value
+                })
+            });
+        }
+        
         results = [{
             race: chosenRace.name,
             alignment: chosenAlignment.name,
@@ -238,6 +271,16 @@
             <div class="flex items-center pl-3">
                 <input id="checkbox_3" type="checkbox" bind:group={numberGen} value="{3}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                 <label for="checkbox_3" class="w-full ml-2 text-sm font-medium">3 classes</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-center gap-2">
+        <span class="text-orange-500 mr-2">Apply stat weight based off classes</span>
+        <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+            <div class="flex items-center pl-3">
+                <input id="weight" type="checkbox" bind:checked={weight} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                <label for="weight" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
             </div>
         </div>
     </div>

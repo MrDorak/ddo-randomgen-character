@@ -17,7 +17,7 @@ const free_races: Array<Race> = [
         isIconic: false,
         statsMod: {
             increasedStats : [ { name: "STR", value: 2 }, { name: "CHA", value: 2 }, ],
-            loweredStats : [ { name: "DEX", value: 2 } ]
+            loweredStats : [ { name: "DEX", value: 2 } ],
         }
     },
     {
