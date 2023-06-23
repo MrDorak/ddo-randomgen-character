@@ -6,7 +6,9 @@
         TableBody, TableBodyCell, TableBodyRow,
         TableHead,
         TableHeadCell,
+        Toast
     } from 'flowbite-svelte';
+
     import {
         racesSelected,
         classesSelected,
@@ -15,9 +17,15 @@
         data
     } from '../../store'
 
+    import { slide } from "svelte/transition";
+
     let numberGen = [1, 2, 3];
+
+    let errors = [];
+
     let loading = false;
     let weight = true;
+
     const max = 3;
     const min = 1;
 
@@ -39,51 +47,121 @@
         results = [];
     }
 
-    const handleClick = () => {
-        let classesCopy = $classesSelected;
-
-        const chosenAlignment = $alignmentsSelected[Math.floor(Math.random() * $alignmentsSelected.length)];
-
-        switch (chosenAlignment.alias) {
+    const filterAlignment = (alignment, classes) => {
+        switch (alignment) {
             case 'lawful_good':
-                classesCopy = classesCopy.filter(function( _class ) {
+                classes = classes.filter(function( _class ) {
                     return !["bard", "stormsinger", "barbarian", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.name);
                 })
                 break;
             case 'lawful_neutral':
-                classesCopy = classesCopy.filter(function( _class ) {
+                classes = classes.filter(function( _class ) {
                     return !["bard", "stormsinger", "barbarian", "paladin", "sacred_fist"].includes(_class.name);
                 })
                 break;
             case 'neutral_good':
-                classesCopy = classesCopy.filter(function( _class ) {
+                classes = classes.filter(function( _class ) {
                     return !["monk", "paladin", "sacred_fist", "acolyte_of_the_skin"].includes(_class.name);
                 })
                 break;
             case 'chaotic_good':
-                classesCopy = classesCopy.filter(function( _class ) {
+                classes = classes.filter(function( _class ) {
                     return !["monk", "paladin", "sacred_fist", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.name);
                 })
                 break;
             default:
-                classesCopy = classesCopy.filter(function( _class ) {
+                classes = classes.filter(function( _class ) {
                     return !["monk", "paladin", "sacred_fist"].includes(_class.name);
                 })
                 break;
         }
 
-        if (classesCopy.length === 0) {
-            return;
+        return classes;
+    }
+
+    const handleClick = () => {
+        if (errors.filter(e => e).length === 0) {
+            errors = [];
+        }
+        console.log(errors);
+
+        let racesCopy = JSON.parse(JSON.stringify($racesSelected));
+        let alignmentCopy = JSON.parse(JSON.stringify($alignmentsSelected));
+        let classesCopy = JSON.parse(JSON.stringify($classesSelected));
+        let tmpClasses = JSON.parse(JSON.stringify(classesCopy))
+
+        let alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
+        let chosenAlignment = alignmentCopy[alignmentIdx];
+
+        let raceIdx = Math.floor(Math.random() * racesCopy.length);
+        let chosenRace = racesCopy[raceIdx];
+
+        hasforcedclass: if (chosenRace?.forcedClass) {
+            tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
+
+            while (!tmpClasses.some(tmp => tmp.name === chosenRace?.forcedClass)) {
+                alignmentCopy.splice(alignmentIdx, 1);
+
+                if (alignmentCopy.length === 0){
+                    racesCopy.splice(raceIdx, 1);
+                    raceIdx = Math.floor(Math.random() * racesCopy.length);
+                    chosenRace = racesCopy[raceIdx];
+
+                    if (!chosenRace) {
+                        errors = [...errors, {
+                            message: "No possible outcome out of this configuration of class, race and alignment, please adjust it.",
+                            show: true,
+                            timer: 10
+                        }]
+                        return;
+                    }
+
+                    if (!chosenRace?.forcedClass) {
+                        console.log('break');
+                        break hasforcedclass;
+                    }
+
+                    continue;
+                }
+
+                tmpClasses = JSON.parse(JSON.stringify(classesCopy));
+                alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
+                chosenAlignment = alignmentCopy[alignmentIdx];
+
+                tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
+            }
+
+            let classes = classesCopy.map(_class => _class.name)
+            let races = racesCopy.map(race => race?.forcedClass)
+
+            if (!classes.some(_class => races.includes(_class))) {
+                errors = [...errors, {
+                    message: "No possible outcome out of this configuration of class and race, please adjust it.",
+                    show: true,
+                    timer: 10
+                }]
+                return;
+            }
+
+            while (!classesCopy.some(e => e.name === chosenRace?.forcedClass)) {
+                raceIdx = Math.floor(Math.random() * racesCopy.length);
+                chosenRace = racesCopy[raceIdx]
+            }
         }
 
-        let raceIdx = Math.floor(Math.random() * $racesSelected.length);
-        let chosenRace = $racesSelected[raceIdx];
+        tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
 
-        if (chosenRace?.forcedClass) {
-            while (!classesCopy.some(e => e.name === chosenRace?.forcedClass)) {
-                raceIdx = Math.floor(Math.random() * $racesSelected.length);
-                chosenRace = $racesSelected[raceIdx]
+        while (tmpClasses.length === 0) {
+            alignmentCopy.splice(alignmentIdx, 1)
+            if (alignmentCopy.length === 0){
+                return;
             }
+
+            tmpClasses = JSON.parse(JSON.stringify(classesCopy));
+            alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
+            chosenAlignment = alignmentCopy[alignmentIdx];
+
+            tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
         }
 
         // use input data unless nothing is selected where we use the default 1-3 range
@@ -93,7 +171,7 @@
         let levels, name;
         for (let i = 1; i <= numberClasses; i++) {
             let weightedStats;
-            if (i === 1 && chosenRace.forcedClass?.length > 0) {
+            if (i === 1 && chosenRace?.forcedClass?.length > 0) {
                 name = chosenRace.forcedClass;
                 weightedStats = classesCopy.find(classes => classes.name === name).weightedStats
             } else {
@@ -196,7 +274,6 @@
             startingStats = '32'
         }
 
-        console.log(weight);
         if (weight) {
             chosenClasses.map(_class => {
                 _class.weightedStats.forEach(stat => {
@@ -254,6 +331,17 @@
             stats: chosenStats
         }, ...results]
     }
+
+    function timeout(idx) {
+        if (!errors[idx].timer) {
+            errors[idx].timer = 5;
+        }
+        if (--errors[idx].timer > 0)
+            return setTimeout(timeout, 1000, idx);
+
+        errors[idx] = null;
+    }
+
 </script>
 
 <div class="flex flex-col justify-center gap-5">
@@ -284,7 +372,7 @@
             </div>
         </div>
     </div>
-
+    
     <ButtonGroup class="rounded-lg justify-center shadow-none">
         <Button outline color="blue" disabled={ !$data } on:click={ handleClick }>Randomize !</Button>
         <Button outline color="red" disabled={ !$data || !results.length } on:click={ clearResults }>Clear</Button>
@@ -322,4 +410,15 @@
             </Table>
         {/if}
     </div>
+</div>
+
+<div class="fixed top-12 right-5 flex flex-col gap-3">
+    {#each errors.filter(e => e) as error, i}
+        <Toast on:load={timeout(i)} divClass="w-full max-w-xs p-4 text-gray-500 bg-red-400 dark:bg-red-500 shadow text-slate-900 dark:text-white gap-3 border border-red-500"
+               transition={slide}
+               bind:open={error.show}
+        >
+            { error.message }
+        </Toast>
+    {/each}
 </div>

@@ -7,3 +7,10 @@ img {
     width: 3rem;
     height: 3rem;
 }
+
+.dark button[aria-label="Close"] {
+    color: white !important;
+}
+button[aria-label="Close"] {
+    color: black !important;
+}

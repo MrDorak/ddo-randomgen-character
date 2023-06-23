@@ -47,8 +47,6 @@
             </ul>
         </div>
 
-        <!--Selected : { $racesSelected }-->
-
         <Race show="{raceSelector}" />
 
         <Class show="{classSelector}" />
