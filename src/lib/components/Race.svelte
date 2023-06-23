@@ -1,10 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { Spinner, Checkbox } from 'flowbite-svelte';
+    import {Spinner, Checkbox, Tooltip} from 'flowbite-svelte';
     import { fetchStore, hasAllFreeRaceSelected, hasAllPremiumRaceSelected, hasAllIconicRaceSelected } from '../../store'
     import { writable } from "svelte/store";
 
     export let show
+    export let displayNames
 
     let [ data, loading, error ] = [ null, writable(true), null];
 
@@ -56,15 +57,29 @@
         <p class="text-red-500">{$error}</p>
         {:else}
             {#if $data.races.free.length}
-                <div class="flex flex-col gap-2 p-2 bg-blue-300 grow rounded-l-lg">
+                <div class="flex flex-col gap-2 p-2 bg-blue-500 grow rounded-l-lg">
                     <span class="text-center text-slate-900">Free</span>
                     <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.races.free) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="free_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="free_{data.name}">
-                                <img src="images/races/free/{data.name}_race_icon.png" alt="" />
+                            <label for="free_{data.name}" class="flex flex-col items-center">
+                                <img src="images/races/free/{data.name}_race_icon.png"
+                                     alt="{data.displayName}"
+                                     title="{data.displayName}"
+                                />
+                                <Tooltip>
+                                    Name: <span class="text-blue-500">{data.displayName}</span>.
+                                    {#if data?.statsMod}
+                                        <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
+                                            return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);
+                                        }).join(', ')} </b>
+                                    {/if}
+                                </Tooltip>
+                                {#if displayNames}
+                                    <small>{data.displayName}</small>
+                                {/if}
                             </label>
                         {/each}
                     </div>
@@ -78,8 +93,22 @@
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="premium_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="premium_{data.name}">
-                                <img src="images/races/premium/{data.name}_race_icon.png" alt=""/>
+                            <label for="premium_{data.name}" class="flex flex-col items-center">
+                                <img src="images/races/premium/{data.name}_race_icon.png"
+                                     alt="{data.displayName}"
+                                     title="{data.displayName}"
+                                />
+                                <Tooltip>
+                                    Name: <span class="text-red-500">{data.displayName}</span>.
+                                    {#if data?.statsMod}
+                                        <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
+                                            return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);
+                                        }).join(', ')} </b>
+                                    {/if}
+                                </Tooltip>
+                                {#if displayNames}
+                                    <small>{data.displayName}</small>
+                                {/if}
                             </label>
                         {/each}
                     </div>
@@ -93,8 +122,23 @@
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="iconic_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="iconic_{data.name}">
-                                <img src="images/races/iconic/{data.name}_race_icon.png" alt="" />
+                            <label for="iconic_{data.name}" class="flex flex-col items-center">
+                                <img src="images/races/iconic/{data.name}_race_icon.png"
+                                     alt="{data.displayName}"
+                                     title="{data.displayName}"
+                                />
+                                <Tooltip>
+                                    Name: <span class="text-yellow-500">{data.displayName}</span>.
+                                    Forced class : <span class="text-red-500">{data.forcedClass}</span>.
+                                    {#if data?.statsMod}
+                                        <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
+                                            return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);
+                                        }).join(', ')} </b>
+                                    {/if}
+                                </Tooltip>
+                                {#if displayNames}
+                                    <small>{data.displayName}</small>
+                                {/if}
                             </label>
                         {/each}
                     </div>

@@ -2,7 +2,7 @@
     import {
         Button,
         ButtonGroup,
-        Spinner, Table,
+        Table,
         TableBody, TableBodyCell, TableBodyRow,
         TableHead,
         TableHeadCell,
@@ -19,17 +19,15 @@
 
     import { slide } from "svelte/transition";
 
-    let numberGen = [1, 2, 3];
-
+    let results = [];
     let errors = [];
 
-    let loading = false;
-    let weight = true;
+    let numberGen = [1, 2, 3];
+
+    let weight = "no_weight";
 
     const max = 3;
     const min = 1;
-
-    let results = [];
     const base_stats = [
         {name: 'STR', value: 8, weight: 1},
         {name: 'DEX', value: 8, weight: 1},
@@ -83,7 +81,6 @@
         if (errors.filter(e => e).length === 0) {
             errors = [];
         }
-        console.log(errors);
 
         let racesCopy = JSON.parse(JSON.stringify($racesSelected));
         let alignmentCopy = JSON.parse(JSON.stringify($alignmentsSelected));
@@ -117,7 +114,6 @@
                     }
 
                     if (!chosenRace?.forcedClass) {
-                        console.log('break');
                         break hasforcedclass;
                     }
 
@@ -274,12 +270,14 @@
             startingStats = '32'
         }
 
-        if (weight) {
-            chosenClasses.map(_class => {
-                _class.weightedStats.forEach(stat => {
-                    const statIndex = chosenStats.findIndex(baseStat => baseStat.name === stat.name)
-                    chosenStats[statIndex].weight += (stat.value - 1)
-                })
+        if (weight !== 'no_weight') {
+            chosenClasses.map((_class, idx) => {
+                if ((weight === 'weight_main' && idx === 0) || weight === 'weight_all') {
+                    _class.weightedStats.forEach(stat => {
+                        const statIndex = chosenStats.findIndex(baseStat => baseStat.name === stat.name)
+                        chosenStats[statIndex].weight += (stat.value - 1)
+                    })
+                }
             })
         }
 
@@ -290,26 +288,37 @@
         const maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
 
         // allocate stat points
-        for (var pts = 1; pts < startingStats; pts++) {
+        for (let pts = 1; pts <= startingStats; pts++) {
             const randomNumber = maxCumulativeWeight * Math.random();
 
             let ability;
 
             // apply weight
-            for (let itemIndex = 0; itemIndex < chosenStats.length; itemIndex += 1) {
+            for (let itemIndex = 0; itemIndex < chosenStats.length; itemIndex++) {
                 if (chosenStats[itemIndex].value === 18) {
                     continue;
                 }
 
                 if (cumulativeWeights[itemIndex] >= randomNumber) {
                     ability = chosenStats[itemIndex].value
-                    if (ability >= 14 && ability < 16) {
-                        if ((startingStats - pts) < 2) continue;
+                    if (ability === 14 || ability === 15) {
+                        if ((startingStats - pts) < 2) {
+                            if (itemIndex === chosenStats.length - 1) {
+                                pts--;
+                            }
+                            continue;
+                        }
                         pts += 1; // costs 2 total
                     } else if (ability >= 16) {
-                        if (startingStats - pts < 3) continue;
+                        if (startingStats - pts < 3) {
+                            if (itemIndex === chosenStats.length - 1) {
+                                pts--;
+                            }
+                            continue;
+                        }
                         pts += 2; // costs 3 total
                     }
+
                     chosenStats[itemIndex].value++;
                     break;
                 }
@@ -366,9 +375,19 @@
     <div class="flex flex-col justify-center gap-2">
         <span class="text-orange-500 mr-2">Apply stat weight based off classes</span>
         <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
-            <div class="flex items-center pl-3">
-                <input id="weight" type="checkbox" bind:checked={weight} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="weight" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
+            <div class="flex items-center pl-3 gap-3 ">
+                <div>
+                    <input id="no_weight" type="radio" bind:group={weight} value="no_weight" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="no_weight" class="w-full ml-2 text-sm font-medium">Don't apply weight, let chaos reign</label>
+                </div>
+                <div>
+                    <input id="weight_all" type="radio" bind:group={weight} value="weight_all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="weight_all" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
+                </div>
+                <div>
+                    <input id="weight_main" type="radio" bind:group={weight} value="weight_main" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="weight_main" class="w-full ml-2 text-sm font-medium">Apply stat weight based off main class</label>
+                </div>
             </div>
         </div>
     </div>
@@ -379,36 +398,30 @@
     </ButtonGroup>
 
     <div class="flex mb-5">
-        {#if loading}
-            <div class="text-center m-3">
-                Loading <Spinner></Spinner>
-            </div>
-        {:else}
-            <Table divClass="w-full h-[426px] overflow-auto rounded-lg flex-wrap" hoverable={true}>
-                <TableHead>
-                    <TableHeadCell>Alignment</TableHeadCell>
-                    <TableHeadCell>Race</TableHeadCell>
-                    <TableHeadCell>Class 1</TableHeadCell>
-                    <TableHeadCell>Class 2</TableHeadCell>
-                    <TableHeadCell>Class 3</TableHeadCell>
-                    <TableHeadCell>Stats</TableHeadCell>
-                </TableHead>
-                <TableBody>
-                    {#each results as item}
-                        <TableBodyRow>
-                            <TableBodyCell>{item.alignment}</TableBodyCell>
-                            <TableBodyCell>{item.race.replaceAll("_", " ")}</TableBodyCell>
-                            {#each Array(3) as _, index(index)}
-                                <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name.replaceAll("_", " ")}` : '-'}</TableBodyCell>
-                            {/each}
-                            <TableBodyCell>
-                                {@html item.stats.map(stat => `${stat.name}: ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
-                            </TableBodyCell>
-                        </TableBodyRow>
-                    {/each}
-                </TableBody>
-            </Table>
-        {/if}
+        <Table divClass="w-full h-[426px] overflow-auto rounded-lg flex-wrap" hoverable={true}>
+            <TableHead>
+                <TableHeadCell>Alignment</TableHeadCell>
+                <TableHeadCell>Race</TableHeadCell>
+                <TableHeadCell>Class 1</TableHeadCell>
+                <TableHeadCell>Class 2</TableHeadCell>
+                <TableHeadCell>Class 3</TableHeadCell>
+                <TableHeadCell>Stats</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#each results as item}
+                    <TableBodyRow>
+                        <TableBodyCell>{item.alignment}</TableBodyCell>
+                        <TableBodyCell>{item.race.replaceAll("_", " ")}</TableBodyCell>
+                        {#each Array(3) as _, index(index)}
+                            <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name.replaceAll("_", " ")}` : '-'}</TableBodyCell>
+                        {/each}
+                        <TableBodyCell>
+                            {@html item.stats.map(stat => `${stat.name}: ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
+                        </TableBodyCell>
+                    </TableBodyRow>
+                {/each}
+            </TableBody>
+        </Table>
     </div>
 </div>
 

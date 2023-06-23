@@ -1,10 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import {Checkbox, Spinner} from 'flowbite-svelte';
+    import {Checkbox, Spinner, Tooltip} from 'flowbite-svelte';
     import {fetchStore, hasAllFreeClassSelected, hasAllPremiumClassSelected, hasAllArchetypeClassSelected} from '../../store'
     import { writable } from "svelte/store";
 
     export let show
+    export let displayNames
 
     let [ data, loading, error ] = [ null, writable(true), null];
 
@@ -57,15 +58,25 @@
         <p class="text-red-500">{$error}</p>
         {:else }
             {#if $data.classes.free.length}
-                <div class="flex flex-col gap-2 p-2 bg-blue-300 grow rounded-l-lg">
+                <div class="flex flex-col gap-2 p-2 bg-blue-500 grow rounded-l-lg">
                     <span class="text-center text-slate-900">Free</span>
                     <div class="flex flex-wrap justify-center gap-2">
                         {#each Object.values($data.classes.free) as data}
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="free_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="free_{data.name}">
-                                <img src="images/classes/free/{data.name}_class_icon.png" alt="" />
+                            <label for="free_{data.name}" class="flex flex-col items-center">
+                                <img src="images/classes/free/{data.name}_class_icon.png"
+                                    alt="{data.displayName}"
+                                    title="{data.displayName}"
+                                />
+                                <Tooltip>
+                                    Name: <span class="text-blue-500">{data.displayName}</span>.
+                                    Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                </Tooltip>
+                                {#if displayNames}
+                                    <small>{data.displayName}</small>
+                                {/if}
                             </label>
                         {/each}
                     </div>
@@ -79,8 +90,18 @@
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="premium_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="premium_{data.name}">
-                                <img src="images/classes/premium/{data.name}_class_icon.png" alt=""/>
+                            <label for="premium_{data.name}" class="flex flex-col items-center">
+                                <img src="images/classes/premium/{data.name}_class_icon.png"
+                                     alt="{data.displayName}"
+                                     title="{data.displayName}"
+                                />
+                                <Tooltip>
+                                    Name: <span class="text-red-500">{data.displayName}</span>.
+                                    Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                </Tooltip>
+                                {#if displayNames}
+                                    <small>{data.displayName}</small>
+                                {/if}
                             </label>
                         {/each}
                     </div>
@@ -94,8 +115,18 @@
                             <input class="hidden" bind:checked={data.selected} type="checkbox" id="archetype_{data.name}"
                                    on:change={handleChange}
                             />
-                            <label for="archetype_{data.name}">
-                                <img src="images/classes/archetype/{data.name}_class_icon.png" alt="" />
+                            <label for="archetype_{data.name}" class="flex flex-col items-center">
+                                <img src="images/classes/archetype/{data.name}_class_icon.png"
+                                     alt="{data.displayName}"
+                                     title="{data.displayName}"
+                                />
+                                <Tooltip>
+                                    Name: <span class="text-yellow-500">{data.displayName}</span>.
+                                    Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                </Tooltip>
+                                {#if displayNames}
+                                    <small>{data.displayName}</small>
+                                {/if}
                             </label>
                         {/each}
                     </div>

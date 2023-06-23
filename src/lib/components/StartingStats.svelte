@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { Spinner } from 'flowbite-svelte';
+    import {Badge, Spinner, Tooltip} from 'flowbite-svelte';
     import { fetchStore, selectedStartingStats } from '../../store'
     import { writable } from "svelte/store";
 
@@ -19,7 +19,16 @@
 
 <div class:hidden={!show} class="flex flex-col justify-center gap-2">
     <div class="flex gap-3">
-        <span class="text-orange-500 mr-2">Starting Stats Selector</span>
+        <span class="text-orange-500 mr-2 flex">
+            Starting Stats Selector
+            <Badge color="black" rounded large class="!p-1 !font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              <span class="sr-only">Icon description</span>
+            </Badge>
+            <Tooltip>Iconics are by default 32pts. Drow always have 4 less starting points.</Tooltip>
+        </span>
     </div>
     <div class="flex">
         {#if $loading}
