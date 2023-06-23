@@ -129,7 +129,7 @@
                                 />
                                 <Tooltip>
                                     Name: <span class="text-yellow-500">{data.displayName}</span>.
-                                    Forced class : <span class="text-red-500">{data.forcedClass}</span>.
+                                    Forced class : <span class="text-red-500">{data.displayForcedClass}</span>.
                                     {#if data?.statsMod}
                                         <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
                                             return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);

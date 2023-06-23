@@ -1,13 +1,46 @@
-import { json } from '@sveltejs/kit';
+import {json} from '@sveltejs/kit';
 
 export const prerender = true
 
-const alignments_list: string[] = [
-    "lawful good", "lawful neutral", "neutral good", "true neutral", "chaotic good", "chaotic neutral"];
+export interface Alignment {
+    name: string;
+    displayName: string;
+    selected: boolean | string;
+}
+
+const alignments_list: Array<Alignment> = [
+    {
+        name: "lawful_good",
+        displayName: "Lawful Good",
+        selected: true,
+    },
+    {
+        name: "lawful_neutral",
+        displayName: "Lawful Neutral",
+        selected: true,
+    },
+    {
+        name: "neutral_good",
+        displayName: "Neutral Good",
+        selected: true,
+    },
+    {
+        name: "true_neutral",
+        displayName: "True Neutral",
+        selected: true,
+    },
+    {
+        name: "chaotic_good",
+        displayName: "Chaotic Good",
+        selected: true,
+    },
+    {
+        name: "chaotic_neutral",
+        displayName: "Chaotic Neutral",
+        selected: true,
+    },
+]
 
 export function GET(): Response {
-    const alignments: { name: string, alias: string, selected: boolean, }[]
-        = alignments_list.map((name: string) => ({ name, alias: name.replaceAll(" ", "_"), selected: true }));
-
-    return json(alignments);
+    return json(alignments_list);
 }

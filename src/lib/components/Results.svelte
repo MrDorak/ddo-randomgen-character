@@ -164,15 +164,17 @@
         const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (max - min + 1) + min), classesCopy.length)
         let chosenClasses = [];
         let totalLvls = 20;
-        let levels, name;
+        let levels, name, displayName;
         for (let i = 1; i <= numberClasses; i++) {
             let weightedStats;
             if (i === 1 && chosenRace?.forcedClass?.length > 0) {
                 name = chosenRace.forcedClass;
+                displayName = chosenRace.displayForcedClass;
                 weightedStats = classesCopy.find(classes => classes.name === name).weightedStats
             } else {
                 const classIdx = Math.floor(Math.random() * classesCopy.length);
                 name = classesCopy[classIdx].name;
+                displayName = classesCopy[classIdx].displayName;
                 weightedStats = classesCopy[classIdx].weightedStats
             }
 
@@ -250,6 +252,7 @@
             totalLvls -= levels;
             chosenClasses[i - 1] = {
                 name,
+                displayName,
                 levels,
                 weightedStats
             }
@@ -334,8 +337,8 @@
         }
         
         results = [{
-            race: chosenRace.name,
-            alignment: chosenAlignment.name,
+            race: chosenRace.displayName,
+            alignment: chosenAlignment.displayName,
             classes: chosenClasses,
             stats: chosenStats
         }, ...results]
@@ -411,9 +414,9 @@
                 {#each results as item}
                     <TableBodyRow>
                         <TableBodyCell>{item.alignment}</TableBodyCell>
-                        <TableBodyCell>{item.race.replaceAll("_", " ")}</TableBodyCell>
+                        <TableBodyCell>{item.race}</TableBodyCell>
                         {#each Array(3) as _, index(index)}
-                            <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name.replaceAll("_", " ")}` : '-'}</TableBodyCell>
+                            <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].displayName}` : '-'}</TableBodyCell>
                         {/each}
                         <TableBodyCell>
                             {@html item.stats.map(stat => `${stat.name}: ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
