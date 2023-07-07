@@ -137,7 +137,7 @@
                                         Name : <span class="text-yellow-500">{data.name}</span>
                                     </span>
                                     <span>
-                                        Forced class : <span class="text-red-500">{data.displayForcedClass}</span>
+                                        Forced class : <span class="text-red-500">{data.forcedClassName}</span>
                                     </span>
                                     {#if data?.statsMod}
                                         <span>
