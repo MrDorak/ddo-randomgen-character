@@ -179,7 +179,7 @@ export const universalTreesSelected: Readable<Data[]> = derived(
 
         let selected = Object.values($data.universal_trees).filter((r: Data) => r.selected)
         if (selected.length === 0) {
-            return Object.values($data.universal_trees)
+            return []
         }
 
         return selected
