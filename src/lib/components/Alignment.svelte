@@ -9,7 +9,6 @@
     } from '../../store'
     import { writable } from "svelte/store";
 
-    export let show
 
     let [ data, loading, error ] = [ null, writable(true), null];
 
@@ -30,13 +29,13 @@
 
     const toggle = (e, type) => {
         data.update(data => {
-            Object.values(data.alignments).forEach(alignment => alignment.name.startsWith(type) || alignment.name.includes(type) ? alignment.selected = e.target.checked : null);
+            Object.values(data.alignments).forEach(alignment => alignment.alias.startsWith(type) || alignment.alias.includes(type) ? alignment.selected = e.target.checked : null);
             return data
         })
     }
 </script>
 
-<div class:hidden={!show} class="flex flex-col justify-center gap-2">
+<div class="flex flex-col justify-center gap-2">
     <span class="text-orange-500 mr-2">Alignment Selector</span>
     <div class="flex flex-wrap gap-3">
         <Checkbox checked={$hasAllLawfulAlignmentsSelected && $hasAllNeutralAlignmentsSelected && $hasAllChaoticAlignmentsSelected } on:change={e => toggleAll(e)}>
@@ -64,10 +63,10 @@
                 <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
                     {#each Object.values($data.alignments) as data}
                         <div class="flex items-center pl-3">
-                            <input id="alignments_{data.name}" type="checkbox" bind:checked={data.selected} on:change={handleChange}
+                            <input id="alignments_{data.alias}" type="checkbox" bind:checked={data.selected} on:change={handleChange}
                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                            <label for="alignments_{data.name}" class="w-full ml-2 text-sm font-medium">
-                                {data.displayName}
+                            <label for="alignments_{data.alias}" class="w-full ml-2 text-sm font-medium">
+                                {data.name}
                             </label>
                         </div>
                     {/each}

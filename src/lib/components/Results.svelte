@@ -16,6 +16,7 @@
         alignmentsSelected,
         selectedStartingStats,
         randomizeEnhancementTrees,
+        universalTreesSelected,
         data
     } from '../../store'
 
@@ -59,27 +60,27 @@
         switch (alignment) {
             case 'lawful_good':
                 classes = classes.filter(function( _class ) {
-                    return !["bard", "stormsinger", "barbarian", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.name);
+                    return !["bard", "stormsinger", "barbarian", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.alias);
                 })
                 break;
             case 'lawful_neutral':
                 classes = classes.filter(function( _class ) {
-                    return !["bard", "stormsinger", "barbarian", "paladin", "sacred_fist"].includes(_class.name);
+                    return !["bard", "stormsinger", "barbarian", "paladin", "sacred_fist"].includes(_class.alias);
                 })
                 break;
             case 'neutral_good':
                 classes = classes.filter(function( _class ) {
-                    return !["monk", "paladin", "sacred_fist", "acolyte_of_the_skin"].includes(_class.name);
+                    return !["monk", "paladin", "sacred_fist", "acolyte_of_the_skin"].includes(_class.alias);
                 })
                 break;
             case 'chaotic_good':
                 classes = classes.filter(function( _class ) {
-                    return !["monk", "paladin", "sacred_fist", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.name);
+                    return !["monk", "paladin", "sacred_fist", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.alias);
                 })
                 break;
             default:
                 classes = classes.filter(function( _class ) {
-                    return !["monk", "paladin", "sacred_fist"].includes(_class.name);
+                    return !["monk", "paladin", "sacred_fist"].includes(_class.alias);
                 })
                 break;
         }
@@ -137,7 +138,7 @@
                 tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
             }
 
-            let classes = classesCopy.map(_class => _class.name)
+            let classes = classesCopy.map(_class => _class.alias)
             let races = racesCopy.map(race => race?.forcedClass)
 
             if (!classes.some(_class => races.includes(_class))) {
@@ -174,23 +175,23 @@
         const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (maxClasses - minClasses + 1) + minClasses), classesCopy.length)
         let chosenClasses = [];
         let totalLvls = 20;
-        let levels, name, displayName, enhancementTrees, weightedStats;
+        let levels, alias, name, enhancementTrees, weightedStats;
 
         for (let i = 1; i <= numberClasses; i++) {
             if (classesCopy.length === 0) break;
 
             if (i === 1 && chosenRace?.forcedClass?.length > 0) {
-                name = chosenRace.forcedClass;
-                const forcedClass = classesCopy.find(classes => classes.name === name);
+                alias = chosenRace.forcedClass;
+                const forcedClass = classesCopy.find(_class => _class.alias === alias);
 
-                displayName = chosenRace.displayForcedClass;
+                name = chosenRace.forcedClassName;
                 weightedStats = forcedClass.weightedStats
                 enhancementTrees = forcedClass.enhancementTrees;
             } else {
                 const classIdx = Math.floor(Math.random() * classesCopy.length);
-                name = classesCopy[classIdx].name;
+                alias = classesCopy[classIdx].alias;
 
-                displayName = classesCopy[classIdx].displayName;
+                name = classesCopy[classIdx].name;
                 weightedStats = classesCopy[classIdx].weightedStats
                 enhancementTrees = classesCopy[classIdx].enhancementTrees;
             }
@@ -198,55 +199,55 @@
             // paladins/sacred fist cant multiclass with : bard, barbarian, druid, and acolyte of the skin
             // monks cant multiclass with : bard, barbarian
             // archetypes can't be the core class
-            switch (name) {
+            switch (alias) {
                 case 'bard':
                 case 'stormsinger':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["paladin", "sacred_fist", "monk", "stormsinger", "bard"].includes(_class.name);
+                        return !["paladin", "sacred_fist", "monk", "stormsinger", "bard"].includes(_class.alias);
                     })
                     break;
                 case 'barbarian':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["paladin", "sacred_fist", "monk"].includes(_class.name);
+                        return !["paladin", "sacred_fist", "monk"].includes(_class.alias);
                     })
                     break;
                 case 'druid':
                 case 'blight_caster':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["paladin", "sacred_fist", "blight_caster", "druid"].includes(_class.name);
+                        return !["paladin", "sacred_fist", "blight_caster", "druid"].includes(_class.alias);
                     })
                     break;
                 case 'dark_apostate':
                 case 'cleric':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["cleric", "dark_apostate"].includes(_class.name);
+                        return !["cleric", "dark_apostate"].includes(_class.alias);
                     })
                     break;
                 case 'dark_hunter':
                 case 'ranger':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["ranger", "dark_hunter"].includes(_class.name);
+                        return !["ranger", "dark_hunter"].includes(_class.alias);
                     })
                     break;
                 case 'acolyte_of_the_skin':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["paladin", "sacred_fist", "warlock"].includes(_class.name);
+                        return !["paladin", "sacred_fist", "warlock"].includes(_class.alias);
                     })
                     break;
                 case 'warlock':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["acolyte_of_the_skin"].includes(_class.name);
+                        return !["acolyte_of_the_skin"].includes(_class.alias);
                     })
                     break;
                 case 'paladin':
                 case 'sacred_fist':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["bard", "barbarian", "druid", "acolyte_of_the_skin", "paladin", "sacred_fist"].includes(_class.name);
+                        return !["bard", "barbarian", "druid", "acolyte_of_the_skin", "paladin", "sacred_fist"].includes(_class.alias);
                     })
                     break;
                 case 'monk':
                     classesCopy = classesCopy.filter(function( _class ) {
-                        return !["bard", "barbarian"].includes(_class.name);
+                        return !["bard", "barbarian"].includes(_class.alias);
                     })
                     break;
 
@@ -268,14 +269,14 @@
             
             totalLvls -= levels;
             chosenClasses[i - 1] = {
+                alias,
                 name,
-                displayName,
                 levels,
                 weightedStats,
                 enhancementTrees
             }
 
-            classesCopy = classesCopy.filter( _class => _class.name !== name)
+            classesCopy = classesCopy.filter( _class => _class.alias !== alias)
         }
 
         chosenClasses = chosenClasses.sort((a,b) => b.levels - a.levels)
@@ -359,10 +360,13 @@
             chosenEnhancementTrees =
                 chosenClasses
                     .flatMap((_class, idx) => {
-                        _class.enhancementTrees.sort(() => 0.5 - Math.random())
+                        _class.enhancementTrees
+                            .map(value => ({ value, sort: Math.random() }))
+                            .sort((a, b) => a.sort - b.sort)
+                            .map(({ value }) => value)
 
                         // because sorcerer have tree restrictions, I have to randomly remove one for each set of opposites before the weight calc to simplify code
-                        if (_class.name === 'sorcerer') {
+                        if (_class.alias === 'sorcerer') {
                             for (let itemIndex = 0; itemIndex < _class.enhancementTrees.length; itemIndex++) {
                                 switch (_class.enhancementTrees[itemIndex].alias) {
                                     case "fire_savant":
@@ -394,7 +398,7 @@
 
                         return _class.enhancementTrees.map((t, treeIndex) => ({
                             ...t,
-                            className: _class.displayName,
+                            className: _class.name,
                             levels: _class.levels,
                             weight: chosenClasses.length - idx + ((treeIndex + 1) * Math.floor(_class.levels / 0.90))
                         }))
@@ -402,7 +406,26 @@
                     // remove duplicates
                     .filter((tree, idx, self) => idx === self.findIndex(t => t.alias === tree.alias));
 
-            chosenEnhancementTrees.unshift({ name: chosenRace.displayName, alias: "racial", className: "Racial", value: 0, weight: Math.floor(Math.random() * 20), levels: 20 })
+            chosenEnhancementTrees.unshift({ name: chosenRace.name, alias: "racial", className: "Racial", levels: 20, value: 0, weight: Math.floor(Math.random() * 20) })
+
+            const universalTreeCopy = $universalTreesSelected
+                .map(value => ({ value, sort: Math.random() }))
+                .sort((a, b) => a.sort - b.sort)
+                .map(({ value }) => value);
+
+            chosenEnhancementTrees.unshift(
+                ...[
+                    ...universalTreeCopy
+                        .slice(0, Math.floor(Math.random() * (3 - 1 + 1) + 1))
+                        .map((ut, idx) => ({
+                            ...ut,
+                            className: "Universal",
+                            levels: 20,
+                            value: 0,
+                            weight: Math.floor(Math.random() * 20) + 1 + idx
+                        })),
+                ]
+            )
 
             // calculate total tree weight
             const cumulativeTreeWeights = [];
@@ -411,13 +434,17 @@
             }
             const maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
-            let attributed;
+            let attributed, picked_trees = [];
             for (let pts = 1; pts <= enhancementPoints; pts++) {
                 attributed = false;
                 const randomNumber = maxCumulativeTreeWeight * Math.random();
 
                 // apply weight
                 for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
+                    if (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
+                        continue;
+                    }
+
                     if (chosenEnhancementTrees[itemIndex].value >= 45) {
                         continue;
                     }
@@ -433,6 +460,9 @@
                     if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
                         chosenEnhancementTrees[itemIndex].value++;
                         attributed = true;
+                        if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
+                            picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
+                        }
                         break;
                     }
                 }
@@ -442,12 +472,12 @@
                 }
             }
 
-            chosenEnhancementTrees = chosenEnhancementTrees.sort((a,b) => b.value - a.value)
+            chosenEnhancementTrees = chosenEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
         }
 
         results = [{
-            race: chosenRace.displayName,
-            alignment: chosenAlignment.displayName,
+            race: chosenRace.name,
+            alignment: chosenAlignment.name,
             classes: chosenClasses,
             stats: chosenStats,
             enhancement_trees: {
@@ -488,20 +518,20 @@
     </div>
 
     <div class="flex flex-col justify-center gap-2">
-        <span class="text-orange-500 mr-2">Apply stat weight based off classes</span>
+        <span class="text-orange-500 mr-2">Apply ability score weight based off classes</span>
         <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
             <div class="flex items-center pl-3 gap-3 ">
                 <div>
                     <input id="no_weight" type="radio" bind:group={weight} value="no_weight" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="no_weight" class="w-full ml-2 text-sm font-medium">Don't apply weight, let chaos reign</label>
-                </div>
-                <div>
-                    <input id="weight_all" type="radio" bind:group={weight} value="weight_all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="weight_all" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
+                    <label for="no_weight" class="w-full ml-2 text-sm font-medium">Don't apply weight, let it be truly random</label>
                 </div>
                 <div>
                     <input id="weight_main" type="radio" bind:group={weight} value="weight_main" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                     <label for="weight_main" class="w-full ml-2 text-sm font-medium">Apply stat weight based off main class</label>
+                </div>
+                <div>
+                    <input id="weight_all" type="radio" bind:group={weight} value="weight_all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="weight_all" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
                 </div>
             </div>
         </div>
@@ -529,7 +559,7 @@
                         <TableBodyCell>{item.alignment}</TableBodyCell>
                         <TableBodyCell>{item.race}</TableBodyCell>
                         {#each Array(3) as _, index}
-                            <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].displayName}` : '-'}</TableBodyCell>
+                            <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name}` : '-'}</TableBodyCell>
                         {/each}
                         <TableBodyCell>
                             {@html item.stats.map(stat => `${stat.name} : ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
@@ -546,7 +576,7 @@
                     <Modal title="Enhancement trees" bind:open={item.enhancement_trees.open} size="xs" autoclose outsideclose>
                         <div class="flex flex-col gap-2">
                             {@html Object.entries(item.enhancement_trees.trees).map(([key, trees]) => {
-                                return `<span class="flex flex-col"><span class="underline">${key}</span> ${trees.map(stat => `<span>${stat.name} : <span class="text-blue-400">${stat.value}</span></span>`).join(" ")} </span>`
+                                return `<span class="flex flex-col"><span class="underline">${key}</span> ${trees.map(stat => `<span>${stat.name} : <span class="text-blue-400">${stat.value} point${stat.value > 1 ? 's' : ''}</span></span>`).join(" ")} </span>`
                             }).join("")}
                         </div>
                         <svelte:fragment slot='footer'>

@@ -8,19 +8,19 @@ interface Stat {
 export const prerender = true
 
 export interface Race {
+    alias: string;
     name: string;
-    displayName: string;
     selected: boolean | string;
     statsMod?: { increasedStats: Array<Stat>, loweredStats?: Array<Stat> };
     forcedClass?: string
-    displayForcedClass?: string
+    forcedClassName?: string
     isIconic: boolean
 }
 
 const free_races: Array<Race> = [
     {
-        name: "dragonborn",
-        displayName: "Dragonborn",
+        alias: "dragonborn",
+        name: "Dragonborn",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -29,8 +29,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "drow",
-        displayName: "Drow",
+        alias: "drow",
+        name: "Drow",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -39,8 +39,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "dwarf",
-        displayName: "Dwarf",
+        alias: "dwarf",
+        name: "Dwarf",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -49,8 +49,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "elf",
-        displayName: "Elf",
+        alias: "elf",
+        name: "Elf",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -59,8 +59,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "gnome",
-        displayName: "Gnome",
+        alias: "gnome",
+        name: "Gnome",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -69,8 +69,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "halfling",
-        displayName: "Halfling",
+        alias: "halfling",
+        name: "Halfling",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -79,14 +79,14 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "half_elf",
-        displayName: "Half-Elf",
+        alias: "half_elf",
+        name: "Half-Elf",
         selected: true,
         isIconic: false,
     },
     {
-        name: "half_orc",
-        displayName: "Half-Orc",
+        alias: "half_orc",
+        name: "Half-Orc",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -95,14 +95,14 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "human",
-        displayName: "Human",
+        alias: "human",
+        name: "Human",
         selected: true,
         isIconic: false,
     },
     {
-        name: "tiefling",
-        displayName: "Tiefling",
+        alias: "tiefling",
+        name: "Tiefling",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -110,8 +110,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "warforged",
-        displayName: "Warforged",
+        alias: "warforged",
+        name: "Warforged",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -120,8 +120,8 @@ const free_races: Array<Race> = [
         }
     },
     {
-        name: "wood_elf",
-        displayName: "Wood Elf",
+        alias: "wood_elf",
+        name: "Wood Elf",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -133,8 +133,8 @@ const free_races: Array<Race> = [
 
 const premium_races: Array<Race> = [
     {
-        name: "aasimar",
-        displayName: "Aasimar",
+        alias: "aasimar",
+        name: "Aasimar",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -142,8 +142,8 @@ const premium_races: Array<Race> = [
         }
     },
     {
-        name: "shifter",
-        displayName: "Shifter",
+        alias: "shifter",
+        name: "Shifter",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -152,8 +152,8 @@ const premium_races: Array<Race> = [
         }
     },
     {
-        name: "tabaxi",
-        displayName: "Tabaxi",
+        alias: "tabaxi",
+        name: "Tabaxi",
         selected: true,
         isIconic: false,
         statsMod: {
@@ -164,101 +164,101 @@ const premium_races: Array<Race> = [
 
 const iconic_races: Array<Race> = [
     {
-        name: "aasimar_scourge",
-        displayName: "Aasimar Scourge",
+        alias: "aasimar_scourge",
+        name: "Aasimar Scourge",
         selected: true,
         isIconic: true,
         forcedClass: 'ranger',
-        displayForcedClass: 'Ranger',
+        forcedClassName: 'Ranger',
         statsMod: {
             increasedStats : [ { name: "WIS", value: 2 } ]
         }
     },
     {
-        name: "bladeforged",
-        displayName: "Bladeforged",
+        alias: "bladeforged",
+        name: "Bladeforged",
         selected: true,
         isIconic: true,
         forcedClass: 'paladin',
-        displayForcedClass: 'Paladin',
+        forcedClassName: 'Paladin',
         statsMod: {
             increasedStats : [ { name: "CON", value: 2 }, ],
             loweredStats : [ { name: "DEX", value: 2 }, { name: "WIS", value: 2 }, ]
         }
     },
     {
-        name: "deep_gnome",
-        displayName: "Deep Gnome",
+        alias: "deep_gnome",
+        name: "Deep Gnome",
         selected: true,
         isIconic: true,
         forcedClass: 'wizard',
-        displayForcedClass: 'Wizard',
+        forcedClassName: 'Wizard',
         statsMod: {
             increasedStats : [ { name: "INT", value: 2 }, { name: "WIS", value: 2 }, ],
             loweredStats : [ { name: "STR", value: 2 }, { name: "CHA", value: 2 }, ]
         }
     },
     {
-        name: "morninglord",
-        displayName: "Morninglord",
+        alias: "morninglord",
+        name: "Morninglord",
         selected: true,
         isIconic: true,
         forcedClass: 'cleric',
-        displayForcedClass: 'Cleric',
+        forcedClassName: 'Cleric',
         statsMod: {
             increasedStats : [ { name: "INT", value: 2 }, ],
             loweredStats : [ { name: "CON", value: 2 }, ]
         }
     },
     {
-        name: "purple_dragon_knight",
-        displayName: "Purple Dragon Knight",
+        alias: "purple_dragon_knight",
+        name: "Purple Dragon Knight",
         selected: true,
         isIconic: true,
         forcedClass: 'fighter',
-        displayForcedClass: 'Fighter',
+        forcedClassName: 'Fighter',
     },
     {
-        name: "shadar_kai",
-        displayName: "Shadar-kai",
+        alias: "shadar_kai",
+        name: "Shadar-kai",
         selected: true,
         isIconic: true,
         forcedClass: 'rogue',
-        displayForcedClass: 'Rogue',
+        forcedClassName: 'Rogue',
         statsMod: {
             increasedStats : [ { name: "DEX", value: 2 }, ],
             loweredStats : [ { name: "CHA", value: 2 }, ]
         }
     },
     {
-        name: "tiefling_scoundrel",
-        displayName: "Tiefling Scoundrel",
+        alias: "tiefling_scoundrel",
+        name: "Tiefling Scoundrel",
         selected: true,
         isIconic: true,
         forcedClass: 'bard',
-        displayForcedClass: 'Bard',
+        forcedClassName: 'Bard',
         statsMod: {
             increasedStats : [ { name: "CHA", value: 2 }, ],
         }
     },
     {
-        name: "trailblazer",
-        displayName: "Tabaxi Trailblazer",
+        alias: "trailblazer",
+        name: "Tabaxi Trailblazer",
         selected: true,
         isIconic: true,
         forcedClass: 'monk',
-        displayForcedClass: 'Monk',
+        forcedClassName: 'Monk',
         statsMod: {
             increasedStats : [ { name: "DEX", value: 2 }, ],
         }
     },
     {
-        name: "razorclaw",
-        displayName: "Razorclaw Shifter",
+        alias: "razorclaw",
+        name: "Razorclaw Shifter",
         selected: true,
         isIconic: true,
         forcedClass: 'barbarian',
-        displayForcedClass: 'Barbarian',
+        forcedClassName: 'Barbarian',
         statsMod: {
             increasedStats : [ { name: "STR", value: 2 }, ],
             loweredStats : [ { name: "INT", value: 2 }, ]

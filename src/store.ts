@@ -2,19 +2,16 @@ import {derived, writable} from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import type {Race} from "./routes/races/+server";
 import type {Class} from "./routes/classes/+server";
-import type {Alignment} from "./routes/alignments/+server";
 
-interface Data extends Race, Class, Alignment {
+interface Data extends Race, Class {
     selected: boolean | string;
-    name: string;
-    alias?: string;
 }
 
 interface DataProps {
     [index: string]: Data[][];
 }
 
-interface Alignments {
+interface DataArray {
     [index: string]: Array<Data>;
 }
 
@@ -125,7 +122,7 @@ export const hasAllArchetypeClassSelected: Readable<DataProps> = derived(
 
 export const alignmentsSelected: Readable<Data[]> = derived(
     data,
-    ($data: Alignments): Data[] => {
+    ($data: DataArray): Data[] => {
         if (!$data.alignments) {
             return []
         }
@@ -139,35 +136,59 @@ export const alignmentsSelected: Readable<Data[]> = derived(
     }
 );
 
-export const hasAllLawfulAlignmentsSelected: Readable<Alignments> = derived(
+export const hasAllLawfulAlignmentsSelected: Readable<DataArray> = derived(
     data,
-    ($data: any): Alignments | any => {
+    ($data: any): DataArray | any => {
         if (!$data.alignments) return false;
 
         return Object.values($data.alignments).filter((alignment: any) => {
-            return (alignment.name.startsWith("lawful") || alignment.name.includes("lawful")) && !alignment.selected;
+            return (alignment.alias.startsWith("lawful") || alignment.alias.includes("lawful")) && !alignment.selected;
         }).length === 0
     }
 );
 
-export const hasAllNeutralAlignmentsSelected: Readable<Alignments> = derived(
+export const hasAllNeutralAlignmentsSelected: Readable<DataArray> = derived(
     data,
-    ($data: any): Alignments | any => {
+    ($data: any): DataArray | any => {
         if (!$data.alignments) return false;
 
         return Object.values($data.alignments).filter((alignment: any) => {
-            return (alignment.name.startsWith("neutral") || alignment.name.includes("neutral")) && !alignment.selected;
+            return (alignment.alias.startsWith("neutral") || alignment.alias.includes("neutral")) && !alignment.selected;
         }).length === 0
     }
 );
 
-export const hasAllChaoticAlignmentsSelected: Readable<Alignments> = derived(
+export const hasAllChaoticAlignmentsSelected: Readable<DataArray> = derived(
     data,
-    ($data: any): Alignments | any => {
+    ($data: any): DataArray | any => {
         if (!$data.alignments) return false;
 
         return Object.values($data.alignments).filter((alignment: any) => {
-            return (alignment.name.startsWith("chaotic") || alignment.name.includes("chaotic")) && !alignment.selected;
+            return (alignment.alias.startsWith("chaotic") || alignment.alias.includes("chaotic")) && !alignment.selected;
         }).length === 0
+    }
+);
+
+
+export const universalTreesSelected: Readable<Data[]> = derived(
+    data,
+    ($data: DataArray): Data[] => {
+        if (!$data.universal_trees) {
+            return []
+        }
+
+        let selected = Object.values($data.universal_trees).filter((r: Data) => r.selected)
+        if (selected.length === 0) {
+            return Object.values($data.universal_trees)
+        }
+
+        return selected
+    }
+);
+
+export const hasAllUniversalTreesSelected: Readable<DataProps> = derived(
+    data,
+    ($data: any): DataProps | any => {
+        return $data.universal_trees ? (Object.values($data.universal_trees).filter((tree: any) => tree.selected).length === $data.universal_trees.length) : false
     }
 );

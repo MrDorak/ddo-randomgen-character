@@ -10,11 +10,7 @@
 
     import { randomizeEnhancementTrees } from "../store"
     import UpdateNotes from "$lib/components/UpdateNotes.svelte";
-
-    let raceSelector = true;
-    let classSelector = true;
-    let alignmentSelector = true;
-    let startingStatsSelector = true;
+    import UniversalTrees from "$lib/components/UniversalTrees.svelte";
 
     const displayNames = writable(browser && JSON.parse(localStorage.getItem("displayNames")) !== null ? JSON.parse(localStorage.getItem("displayNames")) : true);
 
@@ -73,13 +69,15 @@
             </ul>
         </div>
 
-        <Race show="{raceSelector}" displayNames="{$displayNames}" />
+        <Race displayNames="{$displayNames}" />
 
-        <Class show="{classSelector}" displayNames="{$displayNames}" />
+        <Class displayNames="{$displayNames}" />
 
-        <Alignment show="{alignmentSelector}" />
+        <Alignment />
 
-        <StartingStats show="{startingStatsSelector}" />
+        <StartingStats />
+
+        <UniversalTrees />
 
         <Results></Results>
     </div>

@@ -4,8 +4,6 @@
     import { fetchStore, selectedStartingStats } from '../../store'
     import { writable } from "svelte/store";
 
-    export let show
-
     let [ data, loading, error ] = [ null, writable(true), null];
 
     onMount(async () => {
@@ -17,7 +15,7 @@
     }
 </script>
 
-<div class:hidden={!show} class="flex flex-col justify-center gap-2">
+<div class="flex flex-col justify-center gap-2">
     <div class="flex gap-3">
         <span class="text-orange-500 mr-2 flex">
             Starting Stats Selector

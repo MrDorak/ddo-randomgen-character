@@ -3,40 +3,40 @@ import {json} from '@sveltejs/kit';
 export const prerender = true
 
 export interface Alignment {
+    alias: string;
     name: string;
-    displayName: string;
     selected: boolean | string;
 }
 
 const alignments_list: Array<Alignment> = [
     {
-        name: "lawful_good",
-        displayName: "Lawful Good",
+        alias: "lawful_good",
+        name: "Lawful Good",
         selected: true,
     },
     {
-        name: "lawful_neutral",
-        displayName: "Lawful Neutral",
+        alias: "lawful_neutral",
+        name: "Lawful Neutral",
         selected: true,
     },
     {
-        name: "neutral_good",
-        displayName: "Neutral Good",
+        alias: "neutral_good",
+        name: "Neutral Good",
         selected: true,
     },
     {
-        name: "true_neutral",
-        displayName: "True Neutral",
+        alias: "true_neutral",
+        name: "True Neutral",
         selected: true,
     },
     {
-        name: "chaotic_good",
-        displayName: "Chaotic Good",
+        alias: "chaotic_good",
+        name: "Chaotic Good",
         selected: true,
     },
     {
-        name: "chaotic_neutral",
-        displayName: "Chaotic Neutral",
+        alias: "chaotic_neutral",
+        name: "Chaotic Neutral",
         selected: true,
     },
 ]

@@ -14,8 +14,8 @@ interface Tree {
 }
 
 export interface Class {
+    alias: string;
     name: string;
-    displayName: string;
     selected: boolean | string;
     isArchetype: boolean;
     weightedStats: Array<Stat>;
@@ -24,8 +24,8 @@ export interface Class {
 
 const free_classes: Array<Class> = [
     {
-        name: "barbarian",
-        displayName: "Barbarian",
+        alias: "barbarian",
+        name: "Barbarian",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "STR", value: 2 }, { name: "CON", value: 2 }, ],
@@ -36,8 +36,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "bard",
-        displayName: "Bard",
+        alias: "bard",
+        name: "Bard",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "CHA", value: 3 }, ],
@@ -48,8 +48,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "cleric",
-        displayName: "Cleric",
+        alias: "cleric",
+        name: "Cleric",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "CHA", value: 2 }, { name: "WIS", value: 2 }, ],
@@ -60,8 +60,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "druid",
-        displayName: "Druid",
+        alias: "druid",
+        name: "Druid",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "WIS", value: 2 }, { name: "DEX", value: 2 }, ],
@@ -72,8 +72,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "fighter",
-        displayName: "Fighter",
+        alias: "fighter",
+        name: "Fighter",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "STR", value: 2 }, { name: "DEX", value: 2 }, ],
@@ -84,8 +84,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "monk",
-        displayName: "Monk",
+        alias: "monk",
+        name: "Monk",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "WIS", value: 2 }, { name: "DEX", value: 2 }, ],
@@ -96,8 +96,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "paladin",
-        displayName: "Paladin",
+        alias: "paladin",
+        name: "Paladin",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "STR", value: 2 }, { name: "CHA", value: 2 }, ],
@@ -108,8 +108,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "ranger",
-        displayName: "Ranger",
+        alias: "ranger",
+        name: "Ranger",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "DEX", value: 2 }, { name: "WIS", value: 2 }, ],
@@ -120,8 +120,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "rogue",
-        displayName: "Rogue",
+        alias: "rogue",
+        name: "Rogue",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "DEX", value: 2 }, { name: "INT", value: 2 }, ],
@@ -132,8 +132,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "sorcerer",
-        displayName: "Sorcerer",
+        alias: "sorcerer",
+        name: "Sorcerer",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "CHA", value: 3 }, ],
@@ -146,8 +146,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "warlock",
-        displayName: "Warlock",
+        alias: "warlock",
+        name: "Warlock",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "CHA", value: 2 }, { name: "DEX", value: 2 }, ],
@@ -158,8 +158,8 @@ const free_classes: Array<Class> = [
         ]
     },
     {
-        name: "wizard",
-        displayName: "Wizard",
+        alias: "wizard",
+        name: "Wizard",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "INT", value: 3 }, ],
@@ -173,8 +173,8 @@ const free_classes: Array<Class> = [
 
 const premium_classes: Array<Class> = [
     {
-        name: "alchemist",
-        displayName: "Alchemist",
+        alias: "alchemist",
+        name: "Alchemist",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "INT", value: 3 }, ],
@@ -185,8 +185,8 @@ const premium_classes: Array<Class> = [
         ]
     },
     {
-        name: "artificer",
-        displayName: "Artificer",
+        alias: "artificer",
+        name: "Artificer",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "INT", value: 2 }, { name: "DEX", value: 2 }, ],
@@ -197,8 +197,8 @@ const premium_classes: Array<Class> = [
         ]
     },
     {
-        name: "favored_soul",
-        displayName: "Favored Soul",
+        alias: "favored_soul",
+        name: "Favored Soul",
         selected: true,
         isArchetype: false,
         weightedStats: [ { name: "WIS", value: 2 }, { name: "CHA", value: 2 }, ],
@@ -212,8 +212,8 @@ const premium_classes: Array<Class> = [
 
 const archetype_classes: Array<Class> = [
     {
-        name: "acolyte_of_the_skin",
-        displayName: "Acolyte of the Skin",
+        alias: "acolyte_of_the_skin",
+        name: "Acolyte of the Skin",
         selected: true,
         isArchetype: true,
         weightedStats: [ { name: "CHA", value: 3 }, ],
@@ -224,8 +224,8 @@ const archetype_classes: Array<Class> = [
         ]
     },
     {
-        name: "blight_caster",
-        displayName: "Blight Caster",
+        alias: "blight_caster",
+        name: "Blight Caster",
         selected: true,
         isArchetype: true,
         weightedStats: [ { name: "WIS", value: 3 }, ],
@@ -236,8 +236,8 @@ const archetype_classes: Array<Class> = [
         ]
     },
     {
-        name: "dark_apostate",
-        displayName: "Dark Apostate",
+        alias: "dark_apostate",
+        name: "Dark Apostate",
         selected: true,
         isArchetype: true,
         weightedStats: [ { name: "WIS", value: 2 },  { name: "CHA", value: 2 }, ],
@@ -248,8 +248,8 @@ const archetype_classes: Array<Class> = [
         ]
     },
     {
-        name: "dark_hunter",
-        displayName: "Dark Hunter",
+        alias: "dark_hunter",
+        name: "Dark Hunter",
         selected: true,
         isArchetype: true,
         weightedStats: [ { name: "DEX", value: 2 },  { name: "INT", value: 2 }, ],
@@ -260,8 +260,8 @@ const archetype_classes: Array<Class> = [
         ]
     },
     {
-        name: "sacred_fist",
-        displayName: "Sacred Fist",
+        alias: "sacred_fist",
+        name: "Sacred Fist",
         selected: true,
         isArchetype: true,
         weightedStats: [ { name: "CHA", value: 2 },  { name: "DEX", value: 2 }, ],
@@ -272,8 +272,8 @@ const archetype_classes: Array<Class> = [
         ]
     },
     {
-        name: "stormsinger",
-        displayName: "Stormsinger",
+        alias: "stormsinger",
+        name: "Stormsinger",
         selected: true,
         isArchetype: true,
         weightedStats: [ { name: "CHA", value: 3 }, ],

@@ -30,7 +30,7 @@ let open = false;
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Features</h3>
                 <ul>
-                    <li>- <span class="font-bold text-red-500">NEW !</span> Add optional enhancement (racial and class) trees randomizer, you can now add even more random to your random character !</li>
+                    <li>- <span class="font-bold text-red-500">NEW !</span> Add an optional enhancement trees randomizer, there is now even more random to your random character !</li>
                 </ul>
             </div>
 
