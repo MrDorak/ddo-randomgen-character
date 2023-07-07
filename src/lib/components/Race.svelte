@@ -69,12 +69,15 @@
                                      alt="{data.displayName}"
                                      title="{data.displayName}"
                                 />
-                                <Tooltip>
-                                    Name: <span class="text-blue-500">{data.displayName}</span>.
+                                <Tooltip class="flex flex-col">
+                                    <span>
+                                        Name : <span class="text-blue-500">{data.displayName}</span>
+                                    </span>
                                     {#if data?.statsMod}
-                                        <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
-                                            return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);
-                                        }).join(', ')} </b>
+                                        <span>
+                                            Stats modifiers :
+                                            { @html Object.entries(data.statsMod).map(([idx, changes]) => changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`).join(', ')).join(', ') }
+                                        </span>
                                     {/if}
                                 </Tooltip>
                                 {#if displayNames}
@@ -98,12 +101,15 @@
                                      alt="{data.displayName}"
                                      title="{data.displayName}"
                                 />
-                                <Tooltip>
-                                    Name: <span class="text-red-500">{data.displayName}</span>.
+                                <Tooltip class="flex flex-col">
+                                    <span>
+                                        Name : <span class="text-red-500">{data.displayName}</span>
+                                    </span>
                                     {#if data?.statsMod}
-                                        <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
-                                            return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);
-                                        }).join(', ')} </b>
+                                        <span>
+                                            Stats modifiers :
+                                            { @html Object.entries(data.statsMod).map(([idx, changes]) => changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`).join(', ')).join(', ') }
+                                        </span>
                                     {/if}
                                 </Tooltip>
                                 {#if displayNames}
@@ -127,13 +133,18 @@
                                      alt="{data.displayName}"
                                      title="{data.displayName}"
                                 />
-                                <Tooltip>
-                                    Name: <span class="text-yellow-500">{data.displayName}</span>.
-                                    Forced class : <span class="text-red-500">{data.displayForcedClass}</span>.
+                                <Tooltip class="flex flex-col">
+                                    <span>
+                                        Name : <span class="text-yellow-500">{data.displayName}</span>
+                                    </span>
+                                    <span>
+                                        Forced class : <span class="text-red-500">{data.displayForcedClass}</span>
+                                    </span>
                                     {#if data?.statsMod}
-                                        <b>Stats modifiers : {@html Object.entries(data.statsMod).map(([idx, changes]) => {
-                                            return changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`);
-                                        }).join(', ')} </b>
+                                        <span>
+                                                Stats modifiers :
+                                            { @html Object.entries(data.statsMod).map(([idx, changes]) => changes.map(incr => `<span class="${idx === "increasedStats" ? 'text-green-500' : 'text-red-500'}">${incr.name} : ${idx === "increasedStats" ? '+' + incr.value : -incr.value}</span>`).join(', ')).join(', ') }
+                                        </span>
                                     {/if}
                                 </Tooltip>
                                 {#if displayNames}

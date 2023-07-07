@@ -6,7 +6,8 @@
         TableBody, TableBodyCell, TableBodyRow,
         TableHead,
         TableHeadCell,
-        Toast
+        Toast,
+        Modal
     } from 'flowbite-svelte';
 
     import {
@@ -14,6 +15,7 @@
         classesSelected,
         alignmentsSelected,
         selectedStartingStats,
+        randomizeEnhancementTrees,
         data
     } from '../../store'
 
@@ -25,9 +27,10 @@
     let numberGen = [1, 2, 3];
 
     let weight = "no_weight";
+    let enhancementPoints = 80;
 
-    const max = 3;
-    const min = 1;
+    const maxClasses = 3;
+    const minClasses = 1;
     const base_stats = [
         {name: 'STR', value: 8, weight: 1},
         {name: 'DEX', value: 8, weight: 1},
@@ -36,6 +39,13 @@
         {name: 'WIS', value: 8, weight: 1},
         {name: 'CHA', value: 8, weight: 1},
     ];
+
+    const groupBy = (xs, key) => {
+        return xs.reduce((rv, x) => {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+        }, {});
+    };
 
     const getStatMod = (stat) => {
         return Math.floor((stat / 2) - 5)
@@ -106,7 +116,7 @@
 
                     if (!chosenRace) {
                         errors = [...errors, {
-                            message: "No possible outcome out of this configuration of class, race and alignment, please adjust it.",
+                            message: "No possible outcome for this configuration of class, race and alignment, please adjust it.",
                             show: true,
                             timer: 10
                         }]
@@ -132,7 +142,7 @@
 
             if (!classes.some(_class => races.includes(_class))) {
                 errors = [...errors, {
-                    message: "No possible outcome out of this configuration of class and race, please adjust it.",
+                    message: "No possible outcome for this configuration of class and race, please adjust it.",
                     show: true,
                     timer: 10
                 }]
@@ -161,21 +171,28 @@
         }
 
         // use input data unless nothing is selected where we use the default 1-3 range
-        const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (max - min + 1) + min), classesCopy.length)
+        const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (maxClasses - minClasses + 1) + minClasses), classesCopy.length)
         let chosenClasses = [];
         let totalLvls = 20;
-        let levels, name, displayName;
+        let levels, name, displayName, enhancementTrees, weightedStats;
+
         for (let i = 1; i <= numberClasses; i++) {
-            let weightedStats;
+            if (classesCopy.length === 0) break;
+
             if (i === 1 && chosenRace?.forcedClass?.length > 0) {
                 name = chosenRace.forcedClass;
+                const forcedClass = classesCopy.find(classes => classes.name === name);
+
                 displayName = chosenRace.displayForcedClass;
-                weightedStats = classesCopy.find(classes => classes.name === name).weightedStats
+                weightedStats = forcedClass.weightedStats
+                enhancementTrees = forcedClass.enhancementTrees;
             } else {
                 const classIdx = Math.floor(Math.random() * classesCopy.length);
                 name = classesCopy[classIdx].name;
+
                 displayName = classesCopy[classIdx].displayName;
                 weightedStats = classesCopy[classIdx].weightedStats
+                enhancementTrees = classesCopy[classIdx].enhancementTrees;
             }
 
             // paladins/sacred fist cant multiclass with : bard, barbarian, druid, and acolyte of the skin
@@ -254,12 +271,11 @@
                 name,
                 displayName,
                 levels,
-                weightedStats
+                weightedStats,
+                enhancementTrees
             }
 
-            classesCopy = classesCopy.filter(function( _class ) {
-                return _class.name !== name
-            })
+            classesCopy = classesCopy.filter( _class => _class.name !== name)
         }
 
         chosenClasses = chosenClasses.sort((a,b) => b.levels - a.levels)
@@ -273,8 +289,9 @@
             startingStats = '32'
         }
 
+        // if weight, add it to the base weight
         if (weight !== 'no_weight') {
-            chosenClasses.map((_class, idx) => {
+            chosenClasses.forEach((_class, idx) => {
                 if ((weight === 'weight_main' && idx === 0) || weight === 'weight_all') {
                     _class.weightedStats.forEach(stat => {
                         const statIndex = chosenStats.findIndex(baseStat => baseStat.name === stat.name)
@@ -335,12 +352,108 @@
                 })
             });
         }
-        
+
+        let chosenEnhancementTrees = [];
+
+        if ($randomizeEnhancementTrees) {
+            chosenEnhancementTrees =
+                chosenClasses
+                    .flatMap((_class, idx) => {
+                        _class.enhancementTrees.sort(() => 0.5 - Math.random())
+
+                        // because sorcerer have tree restrictions, I have to randomly remove one for each set of opposites before the weight calc to simplify code
+                        if (_class.name === 'sorcerer') {
+                            for (let itemIndex = 0; itemIndex < _class.enhancementTrees.length; itemIndex++) {
+                                switch (_class.enhancementTrees[itemIndex].alias) {
+                                    case "fire_savant":
+                                        _class.enhancementTrees = _class.enhancementTrees.filter(function (tree) {
+                                            return !["water_savant"].includes(tree.alias);
+                                        })
+                                        break;
+                                    case "water_savant":
+                                        _class.enhancementTrees = _class.enhancementTrees.filter(function (tree) {
+                                            return !["fire_savant"].includes(tree.alias);
+                                        })
+                                        break;
+                                    case "earth_savant":
+                                        _class.enhancementTrees = _class.enhancementTrees.filter(function (tree) {
+                                            return !["air_savant"].includes(tree.alias);
+                                        })
+                                        break;
+                                    case "air_savant":
+                                        _class.enhancementTrees = _class.enhancementTrees.filter(function (tree) {
+                                            return !["earth_savant"].includes(tree.alias);
+                                        })
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+
+                        return _class.enhancementTrees.map((t, treeIndex) => ({
+                            ...t,
+                            className: _class.displayName,
+                            levels: _class.levels,
+                            weight: chosenClasses.length - idx + ((treeIndex + 1) * Math.floor(_class.levels / 0.90))
+                        }))
+                    })
+                    // remove duplicates
+                    .filter((tree, idx, self) => idx === self.findIndex(t => t.alias === tree.alias));
+
+            chosenEnhancementTrees.unshift({ name: chosenRace.displayName, alias: "racial", className: "Racial", value: 0, weight: Math.floor(Math.random() * 20), levels: 20 })
+
+            // calculate total tree weight
+            const cumulativeTreeWeights = [];
+            for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
+                cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+            }
+            const maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+
+            let attributed;
+            for (let pts = 1; pts <= enhancementPoints; pts++) {
+                attributed = false;
+                const randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                // apply weight
+                for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
+                    if (chosenEnhancementTrees[itemIndex].value >= 45) {
+                        continue;
+                    }
+
+                    if (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2) {
+                        continue;
+                    }
+
+                    if (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4) {
+                        continue;
+                    }
+
+                    if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
+                        chosenEnhancementTrees[itemIndex].value++;
+                        attributed = true;
+                        break;
+                    }
+                }
+
+                if (attributed === false) {
+                    pts--;
+                }
+            }
+
+            chosenEnhancementTrees = chosenEnhancementTrees.sort((a,b) => b.value - a.value)
+        }
+
         results = [{
             race: chosenRace.displayName,
             alignment: chosenAlignment.displayName,
             classes: chosenClasses,
-            stats: chosenStats
+            stats: chosenStats,
+            enhancement_trees: {
+                trees: groupBy(chosenEnhancementTrees, 'className'),
+                open: false
+            }
         }, ...results]
     }
 
@@ -353,7 +466,6 @@
 
         errors[idx] = null;
     }
-
 </script>
 
 <div class="flex flex-col justify-center gap-5">
@@ -409,19 +521,38 @@
                 <TableHeadCell>Class 2</TableHeadCell>
                 <TableHeadCell>Class 3</TableHeadCell>
                 <TableHeadCell>Stats</TableHeadCell>
+                <TableHeadCell>Enhancement Trees</TableHeadCell>
             </TableHead>
             <TableBody>
                 {#each results as item}
                     <TableBodyRow>
                         <TableBodyCell>{item.alignment}</TableBodyCell>
                         <TableBodyCell>{item.race}</TableBodyCell>
-                        {#each Array(3) as _, index(index)}
+                        {#each Array(3) as _, index}
                             <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].displayName}` : '-'}</TableBodyCell>
                         {/each}
                         <TableBodyCell>
-                            {@html item.stats.map(stat => `${stat.name}: ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
+                            {@html item.stats.map(stat => `${stat.name} : ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
+                        </TableBodyCell>
+                        <TableBodyCell class="text-center">
+                            {#if Object.keys(item.enhancement_trees.trees).length }
+                                <Button on:click={() => item.enhancement_trees.open = true}>Show Trees</Button>
+                            {:else}
+                                -
+                            {/if}
                         </TableBodyCell>
                     </TableBodyRow>
+
+                    <Modal title="Enhancement trees" bind:open={item.enhancement_trees.open} size="xs" autoclose outsideclose>
+                        <div class="flex flex-col gap-2">
+                            {@html Object.entries(item.enhancement_trees.trees).map(([key, trees]) => {
+                                return `<span class="flex flex-col"><span class="underline">${key}</span> ${trees.map(stat => `<span>${stat.name} : <span class="text-blue-400">${stat.value}</span></span>`).join(" ")} </span>`
+                            }).join("")}
+                        </div>
+                        <svelte:fragment slot='footer'>
+                            <Button>Close</Button>
+                        </svelte:fragment>
+                    </Modal>
                 {/each}
             </TableBody>
         </Table>

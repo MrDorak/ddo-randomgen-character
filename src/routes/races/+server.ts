@@ -1,12 +1,17 @@
 import { json } from '@sveltejs/kit';
 
+interface Stat {
+    name: string
+    value: number
+}
+
 export const prerender = true
 
 export interface Race {
     name: string;
     displayName: string;
     selected: boolean | string;
-    statsMod?: { increasedStats: Array<object>, loweredStats?: Array<object> };
+    statsMod?: { increasedStats: Array<Stat>, loweredStats?: Array<Stat> };
     forcedClass?: string
     displayForcedClass?: string
     isIconic: boolean

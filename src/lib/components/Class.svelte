@@ -70,9 +70,16 @@
                                     alt="{data.displayName}"
                                     title="{data.displayName}"
                                 />
-                                <Tooltip>
-                                    Name: <span class="text-blue-500">{data.displayName}</span>.
-                                    Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                <Tooltip class="flex flex-col">
+                                    <span>
+                                        Name : <span class="text-blue-500">{data.displayName}</span>
+                                    </span>
+                                    <span>
+                                        Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                    </span>
+                                    <span>
+                                        Enhancement trees : {@html data.enhancementTrees.map(s => `<span class="text-green-300">${s.name}</span>`).join(', ')}
+                                    </span>
                                 </Tooltip>
                                 {#if displayNames}
                                     <small>{data.displayName}</small>
@@ -95,9 +102,16 @@
                                      alt="{data.displayName}"
                                      title="{data.displayName}"
                                 />
-                                <Tooltip>
-                                    Name: <span class="text-red-500">{data.displayName}</span>.
-                                    Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                <Tooltip class="flex flex-col">
+                                    <span>
+                                        Name : <span class="text-red-500">{data.displayName}</span>
+                                    </span>
+                                    <span>
+                                        Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                    </span>
+                                    <span>
+                                        Enhancement trees : {@html data.enhancementTrees.map(s => `<span class="text-green-300">${s.name}</span>`).join(', ')}
+                                    </span>
                                 </Tooltip>
                                 {#if displayNames}
                                     <small>{data.displayName}</small>
@@ -120,9 +134,16 @@
                                      alt="{data.displayName}"
                                      title="{data.displayName}"
                                 />
-                                <Tooltip>
-                                    Name: <span class="text-yellow-500">{data.displayName}</span>.
-                                    Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                <Tooltip class="flex flex-col">
+                                    <span>
+                                        Name : <span class="text-yellow-500">{data.displayName}</span>
+                                    </span>
+                                    <span>
+                                        Weight modifier : {@html data.weightedStats.map(s => `<span class="text-purple-400">${s.name}</span>`).join(', ')}
+                                    </span>
+                                    <span>
+                                        Enhancement trees : {@html data.enhancementTrees.map(s => `<span class="text-green-300">${s.name}</span>`).join(', ')}
+                                    </span>
                                 </Tooltip>
                                 {#if displayNames}
                                     <small>{data.displayName}</small>
