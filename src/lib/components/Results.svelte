@@ -21,6 +21,9 @@
     } from '../../store'
 
     import { slide } from "svelte/transition";
+    import type { Alignment} from "../../routes/alignments/+server";
+    import type { Race } from "../../routes/races/+server";
+    import type { Class } from "../../routes/classes/+server";
 
     let results = [];
     let errors = [];
@@ -56,10 +59,10 @@
         results = [];
     }
 
-    const filterAlignment = (alignment, classes) => {
+    const filterAlignment = (alignment : string, classes: Array<Class>) => {
         switch (alignment) {
             case 'lawful_good':
-                classes = classes.filter(function( _class ) {
+                classes = classes.filter(function( _class : Class ) {
                     return !["bard", "stormsinger", "barbarian", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.alias);
                 })
                 break;
@@ -93,82 +96,67 @@
             errors = [];
         }
 
-        let racesCopy = JSON.parse(JSON.stringify($racesSelected));
-        let alignmentCopy = JSON.parse(JSON.stringify($alignmentsSelected));
-        let classesCopy = JSON.parse(JSON.stringify($classesSelected));
-        let tmpClasses = JSON.parse(JSON.stringify(classesCopy))
+        let racesCopy : Array<Race> = JSON.parse(JSON.stringify($racesSelected));
+        let alignmentCopy : Array<Alignment> = JSON.parse(JSON.stringify($alignmentsSelected));
+        let classesCopy : Array<Class> = JSON.parse(JSON.stringify($classesSelected));
+        let tmpClasses : Array<Class> = JSON.parse(JSON.stringify(classesCopy))
 
         let alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
-        let chosenAlignment = alignmentCopy[alignmentIdx];
+        let chosenAlignment : Alignment = alignmentCopy[alignmentIdx];
 
         let raceIdx = Math.floor(Math.random() * racesCopy.length);
-        let chosenRace = racesCopy[raceIdx];
-
-        hasforcedclass: if (chosenRace?.forcedClass) {
-            tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
-
-            while (!tmpClasses.some(tmp => tmp.name === chosenRace?.forcedClass)) {
-                alignmentCopy.splice(alignmentIdx, 1);
-
-                if (alignmentCopy.length === 0){
-                    racesCopy.splice(raceIdx, 1);
-                    raceIdx = Math.floor(Math.random() * racesCopy.length);
-                    chosenRace = racesCopy[raceIdx];
-
-                    if (!chosenRace) {
-                        errors = [...errors, {
-                            message: "No possible outcome for this configuration of class, race and alignment, please adjust it.",
-                            show: true,
-                            timer: 10
-                        }]
-                        return;
-                    }
-
-                    if (!chosenRace?.forcedClass) {
-                        break hasforcedclass;
-                    }
-
-                    continue;
-                }
-
-                tmpClasses = JSON.parse(JSON.stringify(classesCopy));
-                alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
-                chosenAlignment = alignmentCopy[alignmentIdx];
-
-                tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
-            }
-
-            let classes = classesCopy.map(_class => _class.alias)
-            let races = racesCopy.map(race => race?.forcedClass)
-
-            if (!classes.some(_class => races.includes(_class))) {
-                errors = [...errors, {
-                    message: "No possible outcome for this configuration of class and race, please adjust it.",
-                    show: true,
-                    timer: 10
-                }]
-                return;
-            }
-
-            while (!classesCopy.some(e => e.name === chosenRace?.forcedClass)) {
-                raceIdx = Math.floor(Math.random() * racesCopy.length);
-                chosenRace = racesCopy[raceIdx]
-            }
-        }
+        let chosenRace : Race = racesCopy[raceIdx];
 
         tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
 
-        while (tmpClasses.length === 0) {
-            alignmentCopy.splice(alignmentIdx, 1)
-            if (alignmentCopy.length === 0){
-                return;
+        while (tmpClasses.length === 0 || !tmpClasses.some(tmp => tmp.alias === chosenRace?.forcedClass)) {
+            alignmentCopy.splice(alignmentIdx, 1);
+
+            if (alignmentCopy.length === 0) {
+                racesCopy.splice(raceIdx, 1);
+                raceIdx = Math.floor(Math.random() * racesCopy.length);
+                chosenRace = racesCopy[raceIdx];
+
+                if (!chosenRace) {
+                    errors = [...errors, {
+                        message: "No possible outcome for this configuration of class, iconic race and alignment, please adjust it.",
+                        show: true,
+                        timer: 10
+                    }]
+                    return;
+                }
+
+                if (!chosenRace?.forcedClass) {
+                    break;
+                }
+
+                tmpClasses = JSON.parse(JSON.stringify($classesSelected));
+                alignmentCopy = JSON.parse(JSON.stringify($alignmentsSelected));
+                alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
+                chosenAlignment = alignmentCopy[alignmentIdx];
+
+                tmpClasses = filterAlignment(chosenAlignment.alias, $classesSelected)
+
+                continue;
             }
 
-            tmpClasses = JSON.parse(JSON.stringify(classesCopy));
+            tmpClasses = JSON.parse(JSON.stringify($classesSelected));
             alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
             chosenAlignment = alignmentCopy[alignmentIdx];
 
             tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
+        }
+
+        let classes = classesCopy.map(_class => _class.alias)
+        let races = racesCopy.map(race => race?.forcedClass)
+
+        if (!classes.some(_class => races.includes(_class))) {
+            errors = [...errors, {
+                message: "No possible outcome for this configuration of class and race, please adjust it.",
+                show: true,
+                timer: 10
+            }]
+            return;
         }
 
         // use input data unless nothing is selected where we use the default 1-3 range

@@ -1,17 +1,17 @@
 import {derived, writable} from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
-import type {Race} from "./routes/races/+server";
-import type {Class} from "./routes/classes/+server";
+import type { Race } from "./routes/races/+server";
+import type { Class } from "./routes/classes/+server";
 
-interface Data extends Race, Class {
+type Data = Race & Class & {
     selected: boolean | string;
 }
 
-interface DataProps {
+type DataProps = {
     [index: string]: Data[][];
 }
 
-interface DataArray {
+type DataArray = {
     [index: string]: Array<Data>;
 }
 

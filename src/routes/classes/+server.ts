@@ -2,18 +2,18 @@ import { json } from '@sveltejs/kit';
 
 export const prerender = true
 
-interface Stat {
+type Stat = {
     name: string
     value: number
 }
 
-interface Tree {
+type Tree = {
     name: string
     alias: string
     value: number
 }
 
-export interface Class {
+export type Class = {
     alias: string;
     name: string;
     selected: boolean | string;

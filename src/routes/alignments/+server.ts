@@ -2,7 +2,7 @@ import {json} from '@sveltejs/kit';
 
 export const prerender = true
 
-export interface Alignment {
+export type Alignment = {
     alias: string;
     name: string;
     selected: boolean | string;
