@@ -146,18 +146,6 @@
             classesCopy = filterAlignment(chosenAlignment.alias, classesCopy)
         }
 
-        let classes = classesCopy.map(_class => _class.alias)
-        let races = racesCopy.map(race => race?.forcedClass)
-
-        if (!classes.some(_class => races.includes(_class))) {
-            errors = [...errors, {
-                message: "No possible outcome for this configuration of class and race, please adjust it.",
-                show: true,
-                timer: 5
-            }]
-            return;
-        }
-
         // use input data unless nothing is selected where we use the default 1-3 range
         const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (maxClasses - minClasses + 1) + minClasses), classesCopy.length)
         let chosenClasses = [];
@@ -167,7 +155,7 @@
         for (let i = 1; i <= numberClasses; i++) {
             if (classesCopy.length === 0) break;
 
-            if (i === 1 && chosenRace?.forcedClass.length > 0) {
+            if (i === 1 && chosenRace?.forcedClass?.length > 0) {
                 alias = chosenRace.forcedClass;
                 const forcedClass = classesCopy.find(_class => _class.alias === alias);
 
