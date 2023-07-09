@@ -99,7 +99,6 @@
         let racesCopy : Array<Race> = JSON.parse(JSON.stringify($racesSelected));
         let alignmentCopy : Array<Alignment> = JSON.parse(JSON.stringify($alignmentsSelected));
         let classesCopy : Array<Class> = JSON.parse(JSON.stringify($classesSelected));
-        let tmpClasses : Array<Class> = JSON.parse(JSON.stringify(classesCopy))
 
         let alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
         let chosenAlignment : Alignment = alignmentCopy[alignmentIdx];
@@ -107,9 +106,9 @@
         let raceIdx = Math.floor(Math.random() * racesCopy.length);
         let chosenRace : Race = racesCopy[raceIdx];
 
-        tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
+        classesCopy = filterAlignment(chosenAlignment.alias, classesCopy)
 
-        while (tmpClasses.length === 0 || !tmpClasses.some(tmp => tmp.alias === chosenRace?.forcedClass)) {
+        while (classesCopy.length === 0 || !classesCopy.some(tmp => tmp.alias === chosenRace?.forcedClass)) {
             alignmentCopy.splice(alignmentIdx, 1);
 
             if (alignmentCopy.length === 0) {
@@ -121,7 +120,7 @@
                     errors = [...errors, {
                         message: "No possible outcome for this configuration of class, iconic race and alignment, please adjust it.",
                         show: true,
-                        timer: 10
+                        timer: 5
                     }]
                     return;
                 }
@@ -130,21 +129,21 @@
                     break;
                 }
 
-                tmpClasses = JSON.parse(JSON.stringify($classesSelected));
+                classesCopy = JSON.parse(JSON.stringify($classesSelected));
                 alignmentCopy = JSON.parse(JSON.stringify($alignmentsSelected));
                 alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
                 chosenAlignment = alignmentCopy[alignmentIdx];
 
-                tmpClasses = filterAlignment(chosenAlignment.alias, $classesSelected)
+                classesCopy = filterAlignment(chosenAlignment.alias, $classesSelected)
 
                 continue;
             }
 
-            tmpClasses = JSON.parse(JSON.stringify($classesSelected));
+            classesCopy = JSON.parse(JSON.stringify($classesSelected));
             alignmentIdx = Math.floor(Math.random() * alignmentCopy.length);
             chosenAlignment = alignmentCopy[alignmentIdx];
 
-            tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
+            classesCopy = filterAlignment(chosenAlignment.alias, classesCopy)
         }
 
         let classes = classesCopy.map(_class => _class.alias)
@@ -154,7 +153,7 @@
             errors = [...errors, {
                 message: "No possible outcome for this configuration of class and race, please adjust it.",
                 show: true,
-                timer: 10
+                timer: 5
             }]
             return;
         }
@@ -168,7 +167,7 @@
         for (let i = 1; i <= numberClasses; i++) {
             if (classesCopy.length === 0) break;
 
-            if (i === 1 && chosenRace?.forcedClass?.length > 0) {
+            if (i === 1 && chosenRace?.forcedClass.length > 0) {
                 alias = chosenRace.forcedClass;
                 const forcedClass = classesCopy.find(_class => _class.alias === alias);
 
@@ -243,7 +242,7 @@
             }
 
             if (i > 1) {
-                // if this is the last level, we dump all the levels remaining
+                // if this is the last level, we dump all the remaining levels
                 if (i === numberClasses) {
                     levels = totalLvls;
                 } else {
@@ -479,8 +478,10 @@
         if (!errors[idx].timer) {
             errors[idx].timer = 5;
         }
-        if (--errors[idx].timer > 0)
+
+        if (--errors[idx].timer > 0) {
             return setTimeout(timeout, 1000, idx);
+        }
 
         errors[idx] = null;
     }
