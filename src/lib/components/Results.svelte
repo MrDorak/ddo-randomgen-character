@@ -475,15 +475,24 @@
     }
 
     function timeout(idx) {
-        if (!errors[idx].timer) {
-            errors[idx].timer = 5;
-        }
+        try {
+            if (!errors[idx]?.timer) {
+                errors[idx].timer = 5;
+            }
 
-        if (--errors[idx].timer > 0) {
-            return setTimeout(timeout, 1000, idx);
-        }
+            if (--errors[idx].timer > 0) {
+                return setTimeout(timeout, 1000, idx);
+            }
 
-        errors[idx] = null;
+            errors[idx].show = false
+
+            if (!errors.some(e => e.timer !== 0)) {
+                errors = [];
+            }
+        } catch (e) {
+            // fallback
+            setTimeout(() => errors = [], 1000)
+        }
     }
 </script>
 
