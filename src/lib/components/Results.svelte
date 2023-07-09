@@ -107,7 +107,7 @@
         hasforcedclass: if (chosenRace?.forcedClass) {
             tmpClasses = filterAlignment(chosenAlignment.alias, tmpClasses)
 
-            while (!tmpClasses.some(tmp => tmp.alias === chosenRace?.forcedClass)) {
+            while (!tmpClasses.some(tmp => tmp.name === chosenRace?.forcedClass)) {
                 alignmentCopy.splice(alignmentIdx, 1);
 
                 if (alignmentCopy.length === 0){
