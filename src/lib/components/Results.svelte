@@ -435,51 +435,51 @@
             let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
             let attributed, picked_trees = [], randomNumber;
+            for (let pts = 1; pts <= enhancementPoints; pts++) {
+                attributed = false;
+                randomNumber = maxCumulativeTreeWeight * Math.random();
 
-            do {
-                for (let pts = 1; pts <= enhancementPoints; pts++) {
-                    attributed = false;
-                    randomNumber = maxCumulativeTreeWeight * Math.random();
-
-                    // apply weight
-                    for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
-                        if (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
-                            continue;
-                        }
-
-                        if (
-                            (chosenEnhancementTrees[itemIndex].value >= 41)
-                            || (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2)
-                            || (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4)
-                        ) {
-                            //recalculate weights
-                            chosenEnhancementTrees[itemIndex].weight = 0;
-                            cumulativeTreeWeights = [];
-                            for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
-                                cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
-                            }
-                            maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
-                            randomNumber = maxCumulativeTreeWeight * Math.random();
-
-                            continue;
-                        }
-
-                        if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
-                            chosenEnhancementTrees[itemIndex].value++;
-                            attributed = true;
-
-                            if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
-                                picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
-                            }
-                            break;
-                        }
+                // apply weight
+                for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
+                    if (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
+                        continue;
                     }
 
-                    if (attributed === false) {
-                        pts--;
+                    if (
+                        (chosenEnhancementTrees[itemIndex].value >= 41)
+                        || (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2)
+                        || (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4)
+                    ) {
+                        //recalculate weights
+                        chosenEnhancementTrees[itemIndex].weight = 0;
+                        cumulativeTreeWeights = [];
+                        for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
+                            cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                        }
+                        maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+                        randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                        continue;
+                    }
+
+                    if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
+                        chosenEnhancementTrees[itemIndex].value++;
+                        attributed = true;
+
+                        if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
+                            picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
+                        }
+                        break;
                     }
                 }
-            } while(capstone_tree !== "no_capstone" && !chosenEnhancementTrees.some(ce => ce.value === 41))
+
+                if (attributed === false) {
+                    pts--;
+                }
+            }
+/*            do {
+
+            } while(capstone_tree !== "no_capstone" && !chosenEnhancementTrees.some(ce => ce.value === 41))*/
 
             chosenEnhancementTrees = chosenEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
         }
