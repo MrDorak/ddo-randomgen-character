@@ -15,8 +15,6 @@ type DataArray = {
     [index: string]: Array<Data>;
 }
 
-export let randomizeEnhancementTrees: Writable<boolean> = writable(true)
-
 export let data: Writable<any> = writable({})
 
 export let selectedStartingStats: Writable<any> = writable('28')

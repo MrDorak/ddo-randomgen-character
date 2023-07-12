@@ -48,7 +48,7 @@
         </Checkbox>
     </div>
 
-    <div class="flex">
+    <div class="flex flex-wrap">
         {#if $loading}
             <div class="text-center m-3">
                 Loading <Spinner></Spinner>

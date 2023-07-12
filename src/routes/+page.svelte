@@ -8,7 +8,6 @@
     import { browser } from "$app/environment";
     import { writable } from "svelte/store";
 
-    import { randomizeEnhancementTrees } from "../store"
     import UpdateNotes from "$lib/components/UpdateNotes.svelte";
     import UniversalTrees from "$lib/components/UniversalTrees.svelte";
 
@@ -55,14 +54,6 @@
                         <input id="display-names-checkbox-list" type="checkbox" bind:checked={$displayNames} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                         <label for="display-names-checkbox-list" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                             Display names for classes and races
-                        </label>
-                    </div>
-                </li>
-                <li class="w-full dark:border-gray-600">
-                    <div class="flex items-center pl-3">
-                        <input id="class-trees-checkbox-list" type="checkbox" bind:checked={$randomizeEnhancementTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label for="class-trees-checkbox-list" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                            Randomize enhancement trees
                         </label>
                     </div>
                 </li>

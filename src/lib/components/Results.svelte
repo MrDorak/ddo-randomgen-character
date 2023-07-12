@@ -15,7 +15,6 @@
         classesSelected,
         alignmentsSelected,
         selectedStartingStats,
-        randomizeEnhancementTrees,
         universalTreesSelected,
         data
     } from '../../store'
@@ -32,6 +31,7 @@
 
     let weight = "no_weight";
     let capstone_tree = "no_capstone";
+    let randomizeEnhancementTrees = true;
     let enhancementPoints = 80;
 
     const maxClasses = 3;
@@ -283,21 +283,30 @@
             })
         }
 
-        const cumulativeWeights = [];
+        let cumulativeWeights = [];
         for (let i = 0; i < chosenStats.length; i += 1) {
             cumulativeWeights[i] = chosenStats[i].weight + (cumulativeWeights[i - 1] || 0);
         }
-        const maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
+        let maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
 
         // allocate stat points
         for (let pts = 1; pts <= startingStats; pts++) {
-            const randomNumber = maxCumulativeWeight * Math.random();
+            let randomNumber = maxCumulativeWeight * Math.random();
 
             let ability;
 
             // apply weight
             for (let itemIndex = 0; itemIndex < chosenStats.length; itemIndex++) {
                 if (chosenStats[itemIndex].value === 18) {
+                    chosenStats[itemIndex].weight = 0;
+
+                    //recalculate weights
+                    for (let i = 0; i < chosenStats.length; i += 1) {
+                        cumulativeWeights[i] = chosenStats[i].weight + (cumulativeWeights[i - 1] || 0);
+                    }
+                    maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
+                    randomNumber = maxCumulativeWeight * Math.random();
+
                     continue;
                 }
 
@@ -327,6 +336,7 @@
             }
         }
 
+
         if (chosenRace.statsMod) {
             Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
                 changes.forEach(incr => {
@@ -337,18 +347,18 @@
 
         let chosenEnhancementTrees = [];
 
-        if ($randomizeEnhancementTrees) {
+        if (randomizeEnhancementTrees) {
             const universalTreeCopy = $universalTreesSelected
                 .map(value => ({value, sort: Math.random()}))
                 .sort((a, b) => a.sort - b.sort)
                 .map(({value}) => value)
                 .slice(0, Math.floor(Math.random() * (3 - 1 + 1) + 1));
 
-            let capstone_class_tree_idx = null, capstone_enhancement_tree_idx = null;
+            let capstone_class_tree_idx = null, capstone_universal_tree_idx = null;
             if (capstone_tree === "class_capstone") {
                 capstone_class_tree_idx = Math.floor(Math.random() * 3)
-            } else if (capstone_tree === "enhancement_capstone") {
-                capstone_enhancement_tree_idx = Math.floor(Math.random() * (universalTreeCopy.length - 1 + 1))
+            } else if (capstone_tree === "universal_capstone") {
+                capstone_universal_tree_idx = Math.floor(Math.random() * (universalTreeCopy.length - 1 + 1))
             }
 
             chosenEnhancementTrees =
@@ -412,7 +422,7 @@
                             className: "Universal",
                             levels: 20,
                             value: 0,
-                            weight: capstone_enhancement_tree_idx === idx ? 666 : Math.floor(Math.random() * 20) + 1 + idx
+                            weight: capstone_universal_tree_idx === idx ? 666 : Math.floor(Math.random() * 20) + 1 + idx
                         })),
                 ]
             )
@@ -425,43 +435,51 @@
             let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
             let attributed, picked_trees = [], randomNumber;
-            for (let pts = 1; pts <= enhancementPoints; pts++) {
-                attributed = false;
-                randomNumber = maxCumulativeTreeWeight * Math.random();
 
-                // apply weight
-                for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
-                    if (
-                        (chosenEnhancementTrees[itemIndex].value >= 41)
-                        || (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2)
-                        || (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4)
-                        || (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias))
-                    ) {
-                        chosenEnhancementTrees[itemIndex].weight = 0;
-                        for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
-                            cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+            do {
+                for (let pts = 1; pts <= enhancementPoints; pts++) {
+                    attributed = false;
+                    randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                    // apply weight
+                    for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
+                        if (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
+                            continue;
                         }
-                        maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
-                        randomNumber = maxCumulativeTreeWeight * Math.random();
 
-                        continue;
+                        if (
+                            (chosenEnhancementTrees[itemIndex].value >= 41)
+                            || (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2)
+                            || (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4)
+                        ) {
+                            //recalculate weights
+                            chosenEnhancementTrees[itemIndex].weight = 0;
+                            cumulativeTreeWeights = [];
+                            for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
+                                cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                            }
+                            maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+                            randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                            continue;
+                        }
+
+                        if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
+                            chosenEnhancementTrees[itemIndex].value++;
+                            attributed = true;
+
+                            if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
+                                picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
+                            }
+                            break;
+                        }
                     }
 
-                    if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
-                        chosenEnhancementTrees[itemIndex].value++;
-                        attributed = true;
-
-                        if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
-                            picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
-                        }
-                        break;
+                    if (attributed === false) {
+                        pts--;
                     }
                 }
-
-                if (attributed === false) {
-                    pts--;
-                }
-            }
+            } while(capstone_tree !== "no_capstone" && !chosenEnhancementTrees.some(ce => ce.value === 41))
 
             chosenEnhancementTrees = chosenEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
         }
@@ -500,70 +518,95 @@
     }
 </script>
 
-<div class="flex flex-col justify-center gap-5">
+<div class="flex flex-col gap-5">
     <div class="flex flex-col gap-2">
-        <span class="text-orange-500 mr-2">Enhancement Tree options</span>
-        <div class="flex flex-col flex-wrap items-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+        <span class="text-orange-500">Randomizer options</span>
 
-            <div class="flex gap-3 grow">
-                <div>
-                    <input id="no_capstone" type="radio" bind:group={capstone_tree} value="no_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="no_capstone" class="w-full ml-2 text-sm font-medium">No forced capstone</label>
-                </div>
-                <div class="flex items-center pl-3">
-                    <input id="class_capstone" type="radio" bind:group={capstone_tree} value="class_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="class_capstone" class="w-full ml-2 text-sm font-medium">Class capstone</label>
-                    <Badge color="black" rounded large class="!p-1 !font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="sr-only">Information Icon</span>
-                    </Badge>
-                    <Tooltip>Choosing this option will prevent multiclassing.</Tooltip>
-                </div>
-                <div>
-                    <input id="enhancement_capstone" type="radio" bind:group={capstone_tree} value="enhancement_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="enhancement_capstone" class="w-full ml-2 text-sm font-medium">Enhancement capstone</label>
+        <div class="flex flex-col gap-3 p-3 rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="mr-2">Enhancement Trees :</span>
+                <div class="flex flex-wrap flex-col grow gap-2">
+                    <div class="flex flex-wrap justify-center">
+                        <div class="items-center">
+                            <input id="class-trees-checkbox-list" type="checkbox" bind:checked={randomizeEnhancementTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="class-trees-checkbox-list" class="w-full ml-2 text-sm font-medium">Randomize enhancement trees</label>
+                        </div>
+                    </div>
+                    {#if randomizeEnhancementTrees}
+                        <div class="flex flex-wrap">
+                            <div class="flex flex-wrap items-center justify-center gap-3 grow">
+                                <div>
+                                    <input id="no_capstone" type="radio" bind:group={capstone_tree} value="no_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="no_capstone" class="w-full ml-2 text-sm font-medium">No forced capstone</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="class_capstone" type="radio" bind:group={capstone_tree} value="class_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="class_capstone" class="w-full ml-2 text-sm font-medium">Class capstone</label>
+                                    <Badge color="black" rounded large class="!p-1 !font-semibold">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="sr-only">Information Icon</span>
+                                    </Badge>
+                                    <Tooltip>Choosing this option will prevent multiclassing.</Tooltip>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="universal_capstone" type="radio" bind:group={capstone_tree} value="universal_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="universal_capstone" class="w-full ml-2 text-sm font-medium">Universal capstone</label>
+                                    <Badge color="black" rounded large class="!p-1 !font-semibold">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="sr-only">Information Icon</span>
+                                    </Badge>
+                                    <Tooltip>If there is no universal tree selected, this will be ignored.</Tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="flex flex-col gap-2">
-        <span class="text-orange-500 mr-2">Number of multiclass</span>
-        <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
-            <div class="flex items-center pl-3">
-                <input id="checkbox_1" type="checkbox" bind:group={numberGen} value="{1}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox_1" class="w-full ml-2 text-sm font-medium">1 class</label>
-            </div>
-            <div class="flex items-center pl-3">
-                <input id="checkbox_2" type="checkbox" bind:group={numberGen} value="{2}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox_2" class="w-full ml-2 text-sm font-medium">2 classes</label>
-            </div>
-            <div class="flex items-center pl-3">
-                <input id="checkbox_3" type="checkbox" bind:group={numberGen} value="{3}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                <label for="checkbox_3" class="w-full ml-2 text-sm font-medium">3 classes</label>
-            </div>
-        </div>
-    </div>
+            <hr>
 
-    <div class="flex flex-col gap-2">
-        <span class="text-orange-500 mr-2">Apply ability score weight based off classes</span>
-        <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
-            <div class="flex items-center pl-3 gap-3 ">
-                <div>
-                    <input id="no_weight" type="radio" bind:group={weight} value="no_weight" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="no_weight" class="w-full ml-2 text-sm font-medium">Don't apply weight, let it be truly random</label>
-                </div>
-                <div>
-                    <input id="weight_main" type="radio" bind:group={weight} value="weight_main" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="weight_main" class="w-full ml-2 text-sm font-medium">Apply stat weight based off main class</label>
-                </div>
-                <div>
-                    <input id="weight_all" type="radio" bind:group={weight} value="weight_all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                    <label for="weight_all" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="mr-2">Number of multiclass :</span>
+                <div class="flex flex-wrap items-center justify-center gap-3 grow">
+                    <div class="flex items-center">
+                        <input id="checkbox_1" type="checkbox" bind:group={numberGen} value="{1}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="checkbox_1" class="w-full ml-2 text-sm font-medium">1 class</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="checkbox_2" type="checkbox" bind:group={numberGen} value="{2}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="checkbox_2" class="w-full ml-2 text-sm font-medium">2 classes</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="checkbox_3" type="checkbox" bind:group={numberGen} value="{3}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="checkbox_3" class="w-full ml-2 text-sm font-medium">3 classes</label>
+                    </div>
                 </div>
             </div>
+
+            <hr>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="mr-2">Ability score weight :</span>
+                <div class="flex flex-wrap items-center justify-center gap-3 grow">
+                    <div>
+                        <input id="no_weight" type="radio" bind:group={weight} value="no_weight" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="no_weight" class="w-full ml-2 text-sm font-medium">Don't apply weight, let it be truly random</label>
+                    </div>
+                    <div>
+                        <input id="weight_main" type="radio" bind:group={weight} value="weight_main" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="weight_main" class="w-full ml-2 text-sm font-medium">Apply stat weight based off main class</label>
+                    </div>
+                    <div>
+                        <input id="weight_all" type="radio" bind:group={weight} value="weight_all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                        <label for="weight_all" class="w-full ml-2 text-sm font-medium">Apply stat weight based off classes</label>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     

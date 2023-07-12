@@ -25,6 +25,25 @@ let open = false;
         </div>-->
 
         <div class="flex flex-col gap-2">
+            <h2 class="text-2xl underline font-bold text-orange-500">2023-07-12</h2>
+
+            <div class="flex flex-col gap-1">
+                <h3 class="text-xl font-bold">Features</h3>
+                <ul>
+                    <li>- Allow the choice to force a class or an universal capstone</li>
+                    <li>- Some elements have been moved to new categories</li>
+                </ul>
+            </div>
+            <div class="flex flex-col gap-1">
+                <h3 class="text-xl font-bold">Fixes</h3>
+                <ul>
+                    <li>- Alignement now properly takes into account the 2nd and 3rd class (no more true neutral paladins or monks, they have to follow the law again)</li>
+                    <li>- The randomizer doesn't force you into an iconic anymore - sorry !</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
             <h2 class="text-2xl underline font-bold">2023-07-07</h2>
 
             <div class="flex flex-col gap-1">

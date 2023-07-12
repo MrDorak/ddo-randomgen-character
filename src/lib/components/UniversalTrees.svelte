@@ -25,8 +25,8 @@
     }
 </script>
 
-<div class="flex flex-col justify-center gap-2">
-    <span class="text-orange-500 mr-2">Universal Tree Selector</span>
+<div class="flex flex-col gap-2">
+    <span class="text-orange-500">Universal Tree Selector</span>
     <div class="flex flex-wrap gap-3">
         <Checkbox checked={ $hasAllUniversalTreesSelected } on:change={e => toggleAll(e)}>
             Select all
