@@ -47,7 +47,7 @@
             Select all iconic races
         </Checkbox>
     </div>
-    <div class="flex flex-wrap">
+    <div class="flex">
         {#if $loading}
             <div class="text-center m-3">
                 Loading <Spinner></Spinner>
