@@ -39,7 +39,6 @@ let open = false;
                 <h3 class="text-xl font-bold">Fixes</h3>
                 <ul>
                     <li>- Alignement now properly takes into account the 2nd and 3rd class (true neutral paladins or monks are no more, they have to follow the law again)</li>
-                    <li>- The randomizer doesn't force you into an iconic anymore - sorry !</li>
                 </ul>
             </div>
         </div>
