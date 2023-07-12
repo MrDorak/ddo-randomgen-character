@@ -7,7 +7,7 @@
         TableHead,
         TableHeadCell,
         Toast,
-        Modal
+        Modal, Badge, Tooltip
     } from 'flowbite-svelte';
 
     import {
@@ -31,6 +31,7 @@
     let numberGen = [1, 2, 3];
 
     let weight = "no_weight";
+    let capstone_tree = "no_capstone";
     let enhancementPoints = 80;
 
     const maxClasses = 3;
@@ -147,7 +148,12 @@
         }
 
         // use input data unless nothing is selected where we use the default 1-3 range
-        const numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (maxClasses - minClasses + 1) + minClasses), classesCopy.length)
+        let numberClasses = Math.min(numberGen.length > 0 ? numberGen[Math.floor(Math.random()*numberGen.length)] : Math.floor(Math.random() * (maxClasses - minClasses + 1) + minClasses), classesCopy.length)
+
+        // if we have to have a class capstone, we need 20 lvls in a unique class
+        if (capstone_tree === "class_capstone") {
+            numberClasses = 1;
+        }
         let chosenClasses = [];
         let totalLvls = 20;
         let levels, alias, name, enhancementTrees, weightedStats;
@@ -332,6 +338,19 @@
         let chosenEnhancementTrees = [];
 
         if ($randomizeEnhancementTrees) {
+            const universalTreeCopy = $universalTreesSelected
+                .map(value => ({value, sort: Math.random()}))
+                .sort((a, b) => a.sort - b.sort)
+                .map(({value}) => value)
+                .slice(0, Math.floor(Math.random() * (3 - 1 + 1) + 1));
+
+            let capstone_class_tree_idx = null, capstone_enhancement_tree_idx = null;
+            if (capstone_tree === "class_capstone") {
+                capstone_class_tree_idx = Math.floor(Math.random() * 3)
+            } else if (capstone_tree === "enhancement_capstone") {
+                capstone_enhancement_tree_idx = Math.floor(Math.random() * (universalTreeCopy.length - 1 + 1))
+            }
+
             chosenEnhancementTrees =
                 chosenClasses
                     .flatMap((_class, idx) => {
@@ -340,7 +359,7 @@
                             .sort((a, b) => a.sort - b.sort)
                             .map(({ value }) => value)
 
-                        // because sorcerer have tree restrictions, I have to randomly remove one for each set of opposites before the weight calc to simplify code
+                        // because sorcerer have tree restrictions, I have to randomly remove one for each set of opposites before the weight calc
                         if (_class.alias === 'sorcerer') {
                             for (let itemIndex = 0; itemIndex < _class.enhancementTrees.length; itemIndex++) {
                                 switch (_class.enhancementTrees[itemIndex].alias) {
@@ -371,70 +390,67 @@
                             }
                         }
 
-                        return _class.enhancementTrees.map((t, treeIndex) => ({
-                            ...t,
-                            className: _class.name,
-                            levels: _class.levels,
-                            weight: chosenClasses.length - idx + ((treeIndex + 1) * Math.floor(_class.levels / 0.90))
-                        }))
+                        return _class.enhancementTrees.map((t, treeIndex) => {
+                            return {
+                                ...t,
+                                className: _class.name,
+                                levels: _class.levels,
+                                weight: (capstone_class_tree_idx === treeIndex) ? 666 : (chosenClasses.length - idx + ((treeIndex + 1) * Math.floor(_class.levels / 0.90)))
+                            }
+                        })
                     })
                     // remove duplicates
                     .filter((tree, idx, self) => idx === self.findIndex(t => t.alias === tree.alias));
 
             chosenEnhancementTrees.unshift({ name: chosenRace.name, alias: "racial", className: "Racial", levels: 20, value: 0, weight: Math.floor(Math.random() * 20) })
 
-            const universalTreeCopy = $universalTreesSelected
-                .map(value => ({ value, sort: Math.random() }))
-                .sort((a, b) => a.sort - b.sort)
-                .map(({ value }) => value);
-
             chosenEnhancementTrees.unshift(
                 ...[
                     ...universalTreeCopy
-                        .slice(0, Math.floor(Math.random() * (3 - 1 + 1) + 1))
                         .map((ut, idx) => ({
                             ...ut,
                             className: "Universal",
                             levels: 20,
                             value: 0,
-                            weight: Math.floor(Math.random() * 20) + 1 + idx
+                            weight: capstone_enhancement_tree_idx === idx ? 666 : Math.floor(Math.random() * 20) + 1 + idx
                         })),
                 ]
             )
 
             // calculate total tree weight
-            const cumulativeTreeWeights = [];
+            let cumulativeTreeWeights = [];
             for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
                 cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
             }
-            const maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+            let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
-            let attributed, picked_trees = [];
+            let attributed, picked_trees = [], randomNumber;
             for (let pts = 1; pts <= enhancementPoints; pts++) {
                 attributed = false;
-                const randomNumber = maxCumulativeTreeWeight * Math.random();
+                randomNumber = maxCumulativeTreeWeight * Math.random();
 
                 // apply weight
                 for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
-                    if (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
-                        continue;
-                    }
+                    if (
+                        (chosenEnhancementTrees[itemIndex].value >= 41)
+                        || (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2)
+                        || (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4)
+                        || (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias))
+                    ) {
+                        chosenEnhancementTrees[itemIndex].weight = 0;
+                        for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
+                            cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                        }
+                        maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+                        randomNumber = maxCumulativeTreeWeight * Math.random();
 
-                    if (chosenEnhancementTrees[itemIndex].value >= 45) {
-                        continue;
-                    }
-
-                    if (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2) {
-                        continue;
-                    }
-
-                    if (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4) {
                         continue;
                     }
 
                     if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
                         chosenEnhancementTrees[itemIndex].value++;
                         attributed = true;
+
                         if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
                             picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
                         }
@@ -485,7 +501,35 @@
 </script>
 
 <div class="flex flex-col justify-center gap-5">
-    <div class="flex flex-col justify-center gap-2">
+    <div class="flex flex-col gap-2">
+        <span class="text-orange-500 mr-2">Enhancement Tree options</span>
+        <div class="flex flex-col flex-wrap items-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
+
+            <div class="flex gap-3 grow">
+                <div>
+                    <input id="no_capstone" type="radio" bind:group={capstone_tree} value="no_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="no_capstone" class="w-full ml-2 text-sm font-medium">No forced capstone</label>
+                </div>
+                <div class="flex items-center pl-3">
+                    <input id="class_capstone" type="radio" bind:group={capstone_tree} value="class_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="class_capstone" class="w-full ml-2 text-sm font-medium">Class capstone</label>
+                    <Badge color="black" rounded large class="!p-1 !font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="sr-only">Information Icon</span>
+                    </Badge>
+                    <Tooltip>Choosing this option will prevent multiclassing.</Tooltip>
+                </div>
+                <div>
+                    <input id="enhancement_capstone" type="radio" bind:group={capstone_tree} value="enhancement_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                    <label for="enhancement_capstone" class="w-full ml-2 text-sm font-medium">Enhancement capstone</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
         <span class="text-orange-500 mr-2">Number of multiclass</span>
         <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
             <div class="flex items-center pl-3">
@@ -503,7 +547,7 @@
         </div>
     </div>
 
-    <div class="flex flex-col justify-center gap-2">
+    <div class="flex flex-col gap-2">
         <span class="text-orange-500 mr-2">Apply ability score weight based off classes</span>
         <div class="flex flex-wrap justify-center gap-3 p-2 grow rounded-lg text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white">
             <div class="flex items-center pl-3 gap-3 ">
