@@ -427,61 +427,64 @@
                 ]
             )
 
-            // calculate total tree weight
-            let cumulativeTreeWeights = [];
-            for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
-                cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
-            }
-            let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+            let copyEnhancementTrees = JSON.parse(JSON.stringify(chosenEnhancementTrees));
+            let maxEnhancementTreeValue = 41 + Math.floor(Math.random() * 4 + 1) // 42 to 45 in a single tree
 
-            let attributed, picked_trees = [], randomNumber;
-            for (let pts = 1; pts <= enhancementPoints; pts++) {
-                attributed = false;
-                randomNumber = maxCumulativeTreeWeight * Math.random();
+            do {
+                copyEnhancementTrees = JSON.parse(JSON.stringify(chosenEnhancementTrees));
+                // calculate total tree weight
+                let cumulativeTreeWeights = [];
+                for (let i = 0; i < copyEnhancementTrees.length; i += 1) {
+                    cumulativeTreeWeights[i] = copyEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                }
+                let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
-                // apply weight
-                for (let itemIndex = 0; itemIndex < chosenEnhancementTrees.length; itemIndex++) {
-                    if (picked_trees.length === 6 && chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
-                        continue;
+                let attributed, picked_trees = [], randomNumber;
+                for (let pts = 1; pts <= enhancementPoints; pts++) {
+                    attributed = false;
+                    randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                    // apply weight
+                    for (let itemIndex = 0; itemIndex < copyEnhancementTrees.length; itemIndex++) {
+                        if (picked_trees.length === 6 && copyEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(copyEnhancementTrees[itemIndex].alias)) {
+                            continue;
+                        }
+
+                        if (
+                            (copyEnhancementTrees[itemIndex].value >= maxEnhancementTreeValue)
+                            || (copyEnhancementTrees[itemIndex].value >= 10 && copyEnhancementTrees[itemIndex].levels <= 2)
+                            || (copyEnhancementTrees[itemIndex].value >= 20 && copyEnhancementTrees[itemIndex].levels <= 4)
+                        ) {
+                            //recalculate weights
+                            copyEnhancementTrees[itemIndex].weight = 0;
+                            cumulativeTreeWeights = [];
+                            for (let i = 0; i < copyEnhancementTrees.length; i += 1) {
+                                cumulativeTreeWeights[i] = copyEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                            }
+                            maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+                            randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                            continue;
+                        }
+
+                        if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
+                            copyEnhancementTrees[itemIndex].value++;
+                            attributed = true;
+
+                            if(copyEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(copyEnhancementTrees[itemIndex].alias)) {
+                                picked_trees.push(copyEnhancementTrees[itemIndex].alias);
+                            }
+                            break;
+                        }
                     }
 
-                    if (
-                        (chosenEnhancementTrees[itemIndex].value >= 41)
-                        || (chosenEnhancementTrees[itemIndex].value >= 10 && chosenEnhancementTrees[itemIndex].levels <= 2)
-                        || (chosenEnhancementTrees[itemIndex].value >= 20 && chosenEnhancementTrees[itemIndex].levels <= 4)
-                    ) {
-                        //recalculate weights
-                        chosenEnhancementTrees[itemIndex].weight = 0;
-                        cumulativeTreeWeights = [];
-                        for (let i = 0; i < chosenEnhancementTrees.length; i += 1) {
-                            cumulativeTreeWeights[i] = chosenEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
-                        }
-                        maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
-                        randomNumber = maxCumulativeTreeWeight * Math.random();
-
-                        continue;
-                    }
-
-                    if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
-                        chosenEnhancementTrees[itemIndex].value++;
-                        attributed = true;
-
-                        if(chosenEnhancementTrees[itemIndex].alias !== "racial" && !picked_trees.includes(chosenEnhancementTrees[itemIndex].alias)) {
-                            picked_trees.push(chosenEnhancementTrees[itemIndex].alias);
-                        }
-                        break;
+                    if (attributed === false) {
+                        pts--;
                     }
                 }
+            } while(capstone_tree !== "no_capstone" && !copyEnhancementTrees.some(ce => ce.value === maxEnhancementTreeValue))
 
-                if (attributed === false) {
-                    pts--;
-                }
-            }
-/*            do {
-
-            } while(capstone_tree !== "no_capstone" && !chosenEnhancementTrees.some(ce => ce.value === 41))*/
-
-            chosenEnhancementTrees = chosenEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
+            chosenEnhancementTrees = copyEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
         }
 
         results = [{
