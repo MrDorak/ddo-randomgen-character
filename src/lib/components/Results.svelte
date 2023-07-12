@@ -496,7 +496,7 @@
         }, ...results]
     }
 
-    function timeout(idx) {
+    const timeout = idx => {
         try {
             if (!errors[idx]?.timer) {
                 errors[idx].timer = 5;
@@ -515,6 +515,29 @@
             // fallback
             setTimeout(() => errors = [], 1000)
         }
+    }
+
+    const createBlobText = item => {
+        const classes = Object.entries(item.classes).map(([, _class]) => `${_class.levels} ${_class.name}`).join(" / ");
+        const stats = item.stats.map(stat => `${stat.name} : ${stat.value} (${getStatMod(stat.value)})`).join(" - ");
+        const trees = Object.entries(item.enhancement_trees.trees).map(([key, trees]) => `${key}: \n ${trees.map(stat => `\t${stat.name} : ${stat.value} point${stat.value > 1 ? 's' : ''}`).join("\n")}`).join("\n");
+
+        return `${item.alignment} ${item.race}\n\n${classes}\n\n${stats}${trees.length > 0 ? `\n\n${trees}` : ''}`;
+    }
+
+    const download = item => {
+        var blob = new Blob([ createBlobText(item) ], { type: "txt" });
+
+        var a = document.createElement('a');
+        a.download = `${item.alignment} ${item.race}`;
+        a.href = URL.createObjectURL(blob);
+        a.dataset.downloadurl = ["txt", a.download, a.href].join(':');
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(a.href); }, 1500);
+        return false;
     }
 </script>
 
@@ -625,6 +648,7 @@
                 <TableHeadCell>Class 3</TableHeadCell>
                 <TableHeadCell>Stats</TableHeadCell>
                 <TableHeadCell>Enhancement Trees</TableHeadCell>
+                <TableHeadCell>Download / Copy</TableHeadCell>
             </TableHead>
             <TableBody>
                 {#each results as item}
@@ -643,6 +667,17 @@
                             {:else}
                                 -
                             {/if}
+                        </TableBodyCell>
+                        <TableBodyCell>
+                            <div class="flex justify-center items-center gap-2">
+                                <svg on:click={ download(item) } xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-pointer">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                /
+                                <svg on:click={navigator.clipboard.writeText(createBlobText(item))} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
+                                </svg>
+                            </div>
                         </TableBodyCell>
                     </TableBodyRow>
 
