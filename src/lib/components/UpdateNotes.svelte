@@ -32,7 +32,7 @@ let open = false;
                 <ul>
                     <li>- Allow the choice to force a class or an universal capstone</li>
                     <li>- Some elements have been moved to new categories</li>
-                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an icon to download a .txt of the build or copy the raw text !</li>
+                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an icon at the end of the table to download a .txt of the build or copy the raw text</li>
                 </ul>
             </div>
             <div class="flex flex-col gap-1">
