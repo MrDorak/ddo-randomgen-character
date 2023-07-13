@@ -7,7 +7,8 @@
         TableHead,
         TableHeadCell,
         Toast,
-        Modal, Badge, Tooltip
+        Modal, Badge, Tooltip,
+        Popover
     } from 'flowbite-svelte';
 
     import {
@@ -16,7 +17,7 @@
         alignmentsSelected,
         selectedStartingStats,
         universalTreesSelected,
-        data
+        data, destinyTreesSelected
     } from '../../store'
 
     import { slide } from "svelte/transition";
@@ -27,13 +28,17 @@
     let results = [];
     let errors = [];
 
+    let randomizeEnhancementTrees = true;
+    let capstone_tree = "no_capstone";
+    let enhancementPoints = 80;
+
+    let randomizeDestinyTrees = true;
+    let destiny_tier5 = "no_destiny_tier5";
+    let desintyPoints = 60;
+
     let numberGen = [1, 2, 3];
 
     let weight = "no_weight";
-    let capstone_tree = "no_capstone";
-    let randomizeEnhancementTrees = true;
-    let enhancementPoints = 80;
-
     const maxClasses = 3;
     const minClasses = 1;
     const base_stats = [
@@ -53,7 +58,8 @@
     };
 
     const getStatMod = (stat) => {
-        return Math.floor((stat / 2) - 5)
+        const mod = Math.floor((stat / 2) - 5);
+        return mod > 0 ? `+${mod}` : mod
     }
 
     const clearResults = () => {
@@ -486,16 +492,86 @@
 
             chosenEnhancementTrees = copyEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
         }
+        
+        let chosenDestinyTrees = [];
+
+        if (randomizeDestinyTrees) {
+            let tier5_destiny_tree_idx = null;
+            if (destiny_tier5 === "destiny_tier5") {
+                tier5_destiny_tree_idx = Math.floor(Math.random() * 3)
+            }
+
+            chosenDestinyTrees = $destinyTreesSelected
+                .map(value => ({value, sort: Math.random()}))
+                .sort((a, b) => a.sort - b.sort)
+                .map(({value}) => value)
+                .slice(0, 3)
+                .flatMap((ut, idx) => ({
+                    ...ut,
+                    value: 0,
+                    weight: tier5_destiny_tree_idx === idx ? 666 : 1 + idx / 2
+                }));
+
+            let copyDestinyTrees = JSON.parse(JSON.stringify(chosenDestinyTrees));
+            let maxDestinyTreeValue = 31 + Math.floor(Math.random() * 6 + 1) // 32 to 37 in a single tree
+
+            do {
+                copyDestinyTrees = JSON.parse(JSON.stringify(chosenDestinyTrees));
+                // calculate total tree weight
+                let cumulativeTreeWeights = [];
+                for (let i = 0; i < copyDestinyTrees.length; i += 1) {
+                    cumulativeTreeWeights[i] = copyDestinyTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                }
+                let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+
+                let attributed, picked_trees = [], randomNumber;
+                for (let pts = 1; pts <= desintyPoints; pts++) {
+                    attributed = false;
+                    randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                    // apply weight
+                    for (let itemIndex = 0; itemIndex < copyDestinyTrees.length; itemIndex++) {
+                        if (picked_trees.length === 6 && copyDestinyTrees[itemIndex].alias !== "racial" && !picked_trees.includes(copyDestinyTrees[itemIndex].alias)) {
+                            continue;
+                        }
+
+                        if (copyDestinyTrees[itemIndex].value >= maxDestinyTreeValue) {
+                            //recalculate weights
+                            copyDestinyTrees[itemIndex].weight = 0;
+                            cumulativeTreeWeights = [];
+                            for (let i = 0; i < copyDestinyTrees.length; i += 1) {
+                                cumulativeTreeWeights[i] = copyDestinyTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
+                            }
+                            maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
+                            randomNumber = maxCumulativeTreeWeight * Math.random();
+
+                            continue;
+                        }
+
+                        if (cumulativeTreeWeights[itemIndex] >= randomNumber) {
+                            copyDestinyTrees[itemIndex].value++;
+                            attributed = true;
+
+                            break;
+                        }
+                    }
+
+                    if (attributed === false) {
+                        pts--;
+                    }
+                }
+            } while(destiny_tier5 === "destiny_tier5" && !copyDestinyTrees.some(ce => ce.value === maxDestinyTreeValue))
+
+            chosenDestinyTrees = copyDestinyTrees.filter(ct => ct.value !== 0).sort((a,b) => b.value - a.value)
+        }
 
         results = [{
             race: chosenRace.name,
             alignment: chosenAlignment.name,
             classes: chosenClasses,
             stats: chosenStats,
-            enhancement_trees: {
-                trees: groupBy(chosenEnhancementTrees, 'className'),
-                open: false
-            }
+            enhancement_trees: groupBy(chosenEnhancementTrees, 'className'),
+            destiny_trees: chosenDestinyTrees,
         }, ...results]
     }
 
@@ -523,9 +599,10 @@
     const createBlobText = item => {
         const classes = Object.entries(item.classes).map(([, _class]) => `${_class.levels} ${_class.name}`).join(" / ");
         const stats = item.stats.map(stat => `${stat.name} : ${stat.value} (${getStatMod(stat.value)})`).join(" - ");
-        const trees = Object.entries(item.enhancement_trees.trees).map(([key, trees]) => `${key}: \n ${trees.map(stat => `\t${stat.name} : ${stat.value} point${stat.value > 1 ? 's' : ''}`).join("\n")}`).join("\n");
+        const enhancement_trees = Object.entries(item.enhancement_trees).map(([key, trees]) => `${key}: \n ${trees.map(stat => `\t${stat.name} : ${stat.value} point${stat.value > 1 ? 's' : ''}`).join("\n")}`).join("\n");
+        const destiny_trees = item.destiny_trees.map(tree => `${tree.name} : ${tree.value}`).join(" / ");
 
-        return `${item.alignment} ${item.race}\n\n${classes}\n\n${stats}${trees.length > 0 ? `\n\n${trees}` : ''}`;
+        return `${item.alignment} ${item.race}\n\n${classes}\n\n${stats}${enhancement_trees.length > 0 ? `\n\n${enhancement_trees}` : ''}${destiny_trees.length > 0 ? `\n\n${destiny_trees}` : ''}`;
     }
 
     const download = item => {
@@ -554,8 +631,8 @@
                 <div class="flex flex-wrap flex-col grow gap-2">
                     <div class="flex flex-wrap justify-center">
                         <div class="items-center">
-                            <input id="class-trees-checkbox-list" type="checkbox" bind:checked={randomizeEnhancementTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                            <label for="class-trees-checkbox-list" class="w-full ml-2 text-sm font-medium">Randomize enhancement trees</label>
+                            <input id="randomize-enhancement-trees-checkbox" type="checkbox" bind:checked={randomizeEnhancementTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="randomize-enhancement-trees-checkbox" class="w-full ml-2 text-sm font-medium">Randomize enhancement trees</label>
                         </div>
                     </div>
                     {#if randomizeEnhancementTrees}
@@ -586,6 +663,34 @@
                                         <span class="sr-only">Information Icon</span>
                                     </Badge>
                                     <Tooltip>If there is no universal tree selected, this will be ignored.</Tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="mr-2">Destiny Trees :</span>
+                <div class="flex flex-wrap flex-col grow gap-2">
+                    <div class="flex flex-wrap justify-center">
+                        <div class="items-center">
+                            <input id="randomize-destiny-trees-checkbox" type="checkbox" bind:checked={randomizeDestinyTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="randomize-destiny-trees-checkbox" class="w-full ml-2 text-sm font-medium">Randomize destiny trees</label>
+                        </div>
+                    </div>
+                    {#if randomizeDestinyTrees}
+                        <div class="flex flex-wrap">
+                            <div class="flex flex-wrap items-center justify-center gap-3 grow">
+                                <div>
+                                    <input id="no_destiny_tier5" type="radio" bind:group={destiny_tier5} value="no_destiny_tier5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="no_destiny_tier5" class="w-full ml-2 text-sm font-medium">No forced tier 5</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="destiny_tier5" type="radio" bind:group={destiny_tier5} value="destiny_tier5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="destiny_tier5" class="w-full ml-2 text-sm font-medium">Give me that tier 5</label>
                                 </div>
                             </div>
                         </div>
@@ -651,6 +756,7 @@
                 <TableHeadCell>Class 3</TableHeadCell>
                 <TableHeadCell>Stats</TableHeadCell>
                 <TableHeadCell>Enhancement Trees</TableHeadCell>
+                <TableHeadCell>Destiny Trees</TableHeadCell>
                 <TableHeadCell>Download / Copy</TableHeadCell>
             </TableHead>
             <TableBody>
@@ -662,24 +768,61 @@
                             <TableBodyCell>{item.classes[index] ? `${item.classes[index].levels} ${item.classes[index].name}` : '-'}</TableBodyCell>
                         {/each}
                         <TableBodyCell>
-                            {@html item.stats.map(stat => `${stat.name} : ${stat.value} <span class="text-red-400">(${getStatMod(stat.value)})</span>`).join(" - ")}
+                            <Badge large color="dark">
+                                Show me
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+                                </svg>
+                            </Badge>
+                            <Popover transition={slide}>
+                                { @html item.stats.map(stat => `<span class="font-bold">${stat.name}</span> : ${stat.value} <span class="text-${getStatMod(stat.value) > 0 ? 'green' : 'red'}-400">(${getStatMod(stat.value)})</span>`).join(" - ") }
+                            </Popover>
                         </TableBodyCell>
                         <TableBodyCell class="text-center">
-                            {#if Object.keys(item.enhancement_trees.trees).length }
-                                <Button on:click={() => item.enhancement_trees.open = true}>Show Trees</Button>
+                            {#if Object.keys(item.enhancement_trees).length }
+                                <Badge large color="dark">
+                                    Show me
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+                                    </svg>
+                                </Badge>
+                                <Popover transition={slide}>
+                                    <div class="flex flex-col gap-2">
+                                        {@html Object.entries(item.enhancement_trees).map(([key, trees]) => {
+                                            return `<span class="flex flex-col"><span class="underline">${key}</span> ${trees.map(stat => `<span>${stat.name} : <span class="text-blue-400">${stat.value} point${stat.value > 1 ? 's' : ''}</span></span>`).join(" ")} </span>`
+                                        }).join("")}
+                                    </div>
+                                </Popover>
+                            {:else}
+                                -
+                            {/if}
+                        </TableBodyCell>
+                        <TableBodyCell class="text-center">
+                            {#if item.destiny_trees.length }
+                                <Badge large color="dark">
+                                    Show me
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+                                    </svg>
+                                </Badge>
+                                <Popover transition={slide}>
+                                    <div class="flex flex-col">
+                                        { @html item.destiny_trees.map(trees => `<div>${trees.name} : <span class="text-blue-400">${trees.value}</span></div>`).join("") }
+                                    </div>
+                                </Popover>
                             {:else}
                                 -
                             {/if}
                         </TableBodyCell>
                         <TableBodyCell>
                             <div class="flex justify-center items-center gap-2">
-                                <button on:click={ download(item) }>
+                                <button on:click={ download(item) } title="Download button">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-pointer">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                     </svg>
                                 </button>
                                 /
-                                <button on:click={ navigator.clipboard.writeText(createBlobText(item)) }>
+                                <button on:click={ navigator.clipboard.writeText(createBlobText(item)) } title="Copy button">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-pointer">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
                                     </svg>
@@ -688,9 +831,9 @@
                         </TableBodyCell>
                     </TableBodyRow>
 
-                    <Modal title="Enhancement trees" bind:open={item.enhancement_trees.open} size="xs" autoclose outsideclose>
+                    <!--<Modal title="Enhancement trees" bind:open={item.enhancement_trees.open} size="xs" autoclose outsideclose>
                         <div class="flex flex-col gap-2">
-                            {@html Object.entries(item.enhancement_trees.trees).map(([key, trees]) => {
+                            {@html Object.entries(item.enhancement_trees.data).map(([key, trees]) => {
                                 return `<span class="flex flex-col"><span class="underline">${key}</span> ${trees.map(stat => `<span>${stat.name} : <span class="text-blue-400">${stat.value} point${stat.value > 1 ? 's' : ''}</span></span>`).join(" ")} </span>`
                             }).join("")}
                         </div>
@@ -698,6 +841,14 @@
                             <Button>Close</Button>
                         </svelte:fragment>
                     </Modal>
+                    <Modal title="Destiny trees" bind:open={item.destiny_trees.open} size="xs" autoclose outsideclose>
+                        <div class="flex flex-col">
+                            { @html item.destiny_trees.data.map(trees => `<div>${trees.name} : <span class="text-blue-400">${trees.value}</span></div>`).join("") }
+                        </div>
+                        <svelte:fragment slot='footer'>
+                            <Button>Close</Button>
+                        </svelte:fragment>
+                    </Modal>-->
                 {/each}
             </TableBody>
         </Table>

@@ -25,7 +25,19 @@ let open = false;
         </div>-->
 
         <div class="flex flex-col gap-2">
-            <h2 class="text-2xl underline font-bold text-orange-500">2023-07-12</h2>
+            <h2 class="text-2xl underline font-bold text-orange-500">2023-07-13</h2>
+
+            <div class="flex flex-col gap-1">
+                <h3 class="text-xl font-bold">Features</h3>
+                <ul>
+                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an optional destiny trees randomizer (if you can make it to 32).</li>
+                    <li>- Redesigned some results table columns a bit so everything fits better</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <h2 class="text-2xl underline font-bold">2023-07-12</h2>
 
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Features</h3>
@@ -49,7 +61,7 @@ let open = false;
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Features</h3>
                 <ul>
-                    <li>- <span class="font-bold text-red-500">NEW !</span> Add an optional enhancement trees randomizer, there is now even more random to your random character !</li>
+                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an optional enhancement trees randomizer, there is now even more random to your random character !</li>
                 </ul>
             </div>
 

@@ -2,8 +2,9 @@ import {derived, writable} from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import type { Race } from "./routes/races/+server";
 import type { Class } from "./routes/classes/+server";
+import type { Tree } from "./routes/destiny_trees/+server";
 
-type Data = Race & Class & {
+type Data = Race & Class & Tree & {
     selected: boolean | string;
 }
 
@@ -15,7 +16,9 @@ type DataArray = {
     [index: string]: Array<Data>;
 }
 
-export let data: Writable<any> = writable({})
+fetchStore('destiny_trees');
+
+export const data: Writable<any> = writable({})
 
 export let selectedStartingStats: Writable<any> = writable('28')
 
@@ -29,7 +32,7 @@ export async function fetchStore(url: string): Promise<(Writable<any> | Writable
         try {
             const response = await fetch(url)
             const json = await response.json();
-            data.update((data: any) => {
+            data.update((data: DataArray) => {
                 data[url] = json
                 return data;
             })
@@ -60,23 +63,23 @@ export const racesSelected: Readable<Data[]> = derived(
     }
 );
 
-export const hasAllFreeRaceSelected: Readable<DataProps> = derived(
+export const hasAllFreeRaceSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean => {
         return $data.races ? (Object.values($data.races.free).filter((race: any) => race.selected).length === $data.races.free.length) : false
     }
 );
 
-export const hasAllPremiumRaceSelected: Readable<DataProps> = derived(
+export const hasAllPremiumRaceSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean | any => {
         return $data.races ? (Object.values($data.races.premium).filter((race: any) => race.selected).length === $data.races.premium.length) : false
     }
 );
 
-export const hasAllIconicRaceSelected: Readable<DataProps> = derived(
+export const hasAllIconicRaceSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean | any => {
         return $data.races ? (Object.values($data.races.iconic).filter((race: any) => race.selected).length === $data.races.iconic.length) : false
     }
 );
@@ -97,23 +100,23 @@ export const classesSelected: Readable<Data[]> = derived(
     }
 );
 
-export const hasAllFreeClassSelected: Readable<DataProps> = derived(
+export const hasAllFreeClassSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean | any => {
         return $data.classes ? (Object.values($data.classes.free).filter((race: any) => race.selected).length === $data.classes.free.length) : false
     }
 );
 
-export const hasAllPremiumClassSelected: Readable<DataProps> = derived(
+export const hasAllPremiumClassSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean | any => {
         return $data.classes ? (Object.values($data.classes.premium).filter((race: any) => race.selected).length === $data.classes.premium.length) : false
     }
 );
 
-export const hasAllArchetypeClassSelected: Readable<DataProps> = derived(
+export const hasAllArchetypeClassSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean | any => {
         return $data.classes ? (Object.values($data.classes.archetype).filter((race: any) => race.selected).length === $data.classes.archetype.length) : false
     }
 );
@@ -184,9 +187,26 @@ export const universalTreesSelected: Readable<Data[]> = derived(
     }
 );
 
-export const hasAllUniversalTreesSelected: Readable<DataProps> = derived(
+export const hasAllUniversalTreesSelected: Readable<boolean> = derived(
     data,
-    ($data: any): DataProps | any => {
+    ($data: any): boolean | any => {
         return $data.universal_trees ? (Object.values($data.universal_trees).filter((tree: any) => tree.selected).length === $data.universal_trees.length) : false
+    }
+);
+
+export const destinyTreesSelected: Readable<Data[]> = derived(
+    data,
+    ($data: DataArray): Data[] => {
+        if (!$data.destiny_trees) {
+            return []
+        }
+
+        let selected = Object.values($data.destiny_trees).filter((r: Data) => !r?.upcoming)
+
+        if (selected.length === 0) {
+            return []
+        }
+
+        return selected
     }
 );
