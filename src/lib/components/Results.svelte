@@ -18,7 +18,8 @@
         alignmentsSelected,
         selectedStartingStats,
         universalTreesSelected,
-        data, destinyTreesSelected
+        destinyTreesSelected,
+        data,
     } from '../../store'
 
     import { slide } from "svelte/transition";
@@ -65,7 +66,7 @@
             return;
         }
 
-        racialPoints = target.value
+        racialPoints = parseInt(target.value)
     }
 
     let destinyPoints = 60;
@@ -74,16 +75,16 @@
 
     const handleDestiny = ({ target }) => {
         if (parseInt(target.value) < minDestinyPoints) {
-            destinyPoints = target.value = minDestinyPoints;
+            destinyPoints = target.value = parseInt(minDestinyPoints);
             return;
         }
 
         if (parseInt(target.value) > maxDestinyPoints) {
-            destinyPoints = target.value = maxDestinyPoints;
+            destinyPoints = target.value = parseInt(maxDestinyPoints);
             return;
         }
 
-        destinyPoints = target.value;
+        destinyPoints = parseInt(target.value);
     }
 
     $: destinyTreesSelected && (destinyPoints = destinyPoints - 1 < minDestinyPoints ? minDestinyPoints : (destinyPoints > maxDestinyPoints ? maxDestinyPoints : destinyPoints));
