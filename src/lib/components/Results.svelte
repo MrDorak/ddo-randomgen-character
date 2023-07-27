@@ -7,8 +7,9 @@
         TableHead,
         TableHeadCell,
         Toast,
-        Modal, Badge, Tooltip,
-        Popover
+        Badge, Tooltip,
+        Popover,
+        Label, Input
     } from 'flowbite-svelte';
 
     import {
@@ -48,6 +49,44 @@
         {name: 'WIS', value: 8, weight: 1},
         {name: 'CHA', value: 8, weight: 1},
     ];
+
+    let racialPoints = 0;
+    let minRacialPoints = 0;
+    let maxRacialPoints = 14;
+
+    const handleRacial = ({ target }) => {
+        if (parseInt(target.value) < minRacialPoints) {
+            racialPoints = target.value = minRacialPoints;
+            return;
+        }
+
+        if (parseInt(target.value) > maxRacialPoints) {
+            racialPoints = target.value = maxRacialPoints;
+            return;
+        }
+
+        racialPoints = target.value
+    }
+
+    let destinyPoints = 60;
+    $: minDestinyPoints = 48 + $destinyTreesSelected.length;
+    $: maxDestinyPoints = 62 + $destinyTreesSelected.length;
+
+    const handleDestiny = ({ target }) => {
+        if (parseInt(target.value) < minDestinyPoints) {
+            destinyPoints = target.value = minDestinyPoints;
+            return;
+        }
+
+        if (parseInt(target.value) > maxDestinyPoints) {
+            destinyPoints = target.value = maxDestinyPoints;
+            return;
+        }
+
+        destinyPoints = target.value;
+    }
+
+    $: destinyTreesSelected && (destinyPoints = destinyPoints - 1 < minDestinyPoints ? minDestinyPoints : (destinyPoints > maxDestinyPoints ? maxDestinyPoints : destinyPoints));
 
     const groupBy = (xs, key) => {
         return xs.reduce((rv, x) => {
@@ -102,8 +141,6 @@
             errors = [];
         }
 
-        let destinyPoints = 48 + $destinyTreesSelected.length;
-        
         let racesCopy : Array<Race> = JSON.parse(JSON.stringify($racesSelected));
         let alignmentCopy : Array<Alignment> = JSON.parse(JSON.stringify($alignmentsSelected));
         let classesCopy : Array<Class> = JSON.parse(JSON.stringify($classesSelected));
@@ -418,7 +455,7 @@
                     // remove duplicates
                     .filter((tree, idx, self) => idx === self.findIndex(t => t.alias === tree.alias));
 
-            chosenEnhancementTrees.unshift({ name: chosenRace.name, alias: "racial", className: "Racial", levels: 20, value: 0, weight: Math.floor(Math.random() * 20) })
+            chosenEnhancementTrees.unshift({ name: chosenRace.name, alias: "racial", className: "Racial", levels: 20, value: racialPoints, weight: Math.floor(Math.random() * 20) })
 
             chosenEnhancementTrees.unshift(
                 ...[
@@ -630,7 +667,7 @@
                 <span class="mr-2">Enhancement Trees :</span>
                 <div class="flex flex-wrap flex-col grow gap-2">
                     <div class="flex flex-wrap justify-center">
-                        <div class="items-center">
+                        <div class="flex items-center">
                             <input id="randomize-enhancement-trees-checkbox" type="checkbox" bind:checked={randomizeEnhancementTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                             <label for="randomize-enhancement-trees-checkbox" class="w-full ml-2 text-sm font-medium">Randomize enhancement trees</label>
                         </div>
@@ -638,7 +675,7 @@
                     {#if randomizeEnhancementTrees}
                         <div class="flex flex-wrap">
                             <div class="flex flex-wrap items-center justify-center gap-3 grow">
-                                <div>
+                                <div class="flex items-center">
                                     <input id="no_capstone" type="radio" bind:group={capstone_tree} value="no_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="no_capstone" class="w-full ml-2 text-sm font-medium">No forced capstone</label>
                                 </div>
@@ -666,6 +703,21 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="flex flex-wrap">
+                            <div class="flex flex-wrap items-center justify-center gap-3 grow">
+                                <div class="flex items-center">
+                                    <Label for='racial-pts' class='whitespace-nowrap mr-2'>Racial Points</Label>
+                                    <Input id='racial-pts' size="sm"
+                                           bind:placeholder="{minRacialPoints}"
+                                           type="number"
+                                           bind:min="{ minRacialPoints }"
+                                           bind:max="{ maxRacialPoints }"
+                                           value={ racialPoints }
+                                           on:change={ (e) => handleRacial(e) }
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     {/if}
                 </div>
             </div>
@@ -676,7 +728,7 @@
                 <span class="mr-2">Destiny Trees :</span>
                 <div class="flex flex-wrap flex-col grow gap-2">
                     <div class="flex flex-wrap justify-center">
-                        <div class="items-center">
+                        <div class="flex items-center">
                             <input id="randomize-destiny-trees-checkbox" type="checkbox" bind:checked={randomizeDestinyTrees} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                             <label for="randomize-destiny-trees-checkbox" class="w-full ml-2 text-sm font-medium">Randomize destiny trees</label>
                         </div>
@@ -684,13 +736,28 @@
                     {#if randomizeDestinyTrees}
                         <div class="flex flex-wrap">
                             <div class="flex flex-wrap items-center justify-center gap-3 grow">
-                                <div>
+                                <div class="flex items-center">
                                     <input id="no_destiny_tier5" type="radio" bind:group={destiny_tier5} value="no_destiny_tier5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="no_destiny_tier5" class="w-full ml-2 text-sm font-medium">No forced tier 5</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input id="destiny_tier5" type="radio" bind:group={destiny_tier5} value="destiny_tier5" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="destiny_tier5" class="w-full ml-2 text-sm font-medium">Give me that tier 5</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap">
+                            <div class="flex flex-wrap items-center justify-center gap-3 grow">
+                                <div class="flex items-center">
+                                    <Label for='destiny-pts' class='whitespace-nowrap mr-2'>Destiny Points</Label>
+                                    <Input id='destiny-pts' size="sm"
+                                           bind:placeholder="{ minDestinyPoints }"
+                                           type="number"
+                                           bind:min="{ minDestinyPoints }"
+                                           bind:max="{ maxDestinyPoints }"
+                                           value={ destinyPoints }
+                                           on:change={ (e) => handleDestiny(e) }
+                                    />
                                 </div>
                             </div>
                         </div>

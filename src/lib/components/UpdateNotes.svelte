@@ -11,32 +11,32 @@ let open = false;
 </div>
 
 <Modal title="Update Notes" bind:open={open} autoclose outsideclose>
-    <div class="flex flex-col gap-5">
-
-        <!--<div class="flex flex-col gap-2">
-            <h2 class="text-2xl underline font-bold">2023-07-07</h2>
+    <div class="flex flex-col gap-5 text-white">
+        <div class="flex flex-col gap-2 bg-orange-700 rounded p-3">
+            <h2 class="text-2xl underline font-bold">2023-07-27</h2>
 
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Features</h3>
                 <ul>
-                    <li></li>
+                    <li>- Added the Machro-Technic Epic Destiny.</li>
+                    <li>- Added Racial and Destiny points inputs for characters with more than the minimum amount of points</li>
                 </ul>
             </div>
-        </div>-->
+        </div>
 
-        <div class="flex flex-col gap-2">
-            <h2 class="text-2xl underline font-bold text-orange-500">2023-07-13</h2>
+        <div class="flex flex-col gap-2 bg-gray-700 rounded p-3">
+            <h2 class="text-2xl underline font-bold">2023-07-13</h2>
 
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Features</h3>
                 <ul>
-                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an optional destiny trees randomizer (if you can make it to 32).</li>
+                    <li>- <span class="font-bold text-green-500">NEW !</span> Added an optional destiny trees randomizer (if you can make it to 32).</li>
                     <li>- Redesigned some results table columns a bit so everything fits better</li>
                 </ul>
             </div>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 bg-gray-700 rounded p-3">
             <h2 class="text-2xl underline font-bold">2023-07-12</h2>
 
             <div class="flex flex-col gap-1">
@@ -44,9 +44,10 @@ let open = false;
                 <ul>
                     <li>- Allow the choice to force a class or an universal capstone</li>
                     <li>- Some elements have been moved to new categories</li>
-                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an icon at the end of the table to download a .txt of the build or copy the raw text</li>
+                    <li>- <span class="font-bold text-green-500">NEW !</span> Added an icon at the end of the table to download a .txt of the build or copy the raw text</li>
                 </ul>
             </div>
+
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Fixes</h3>
                 <ul>
@@ -55,13 +56,13 @@ let open = false;
             </div>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 bg-gray-700 rounded p-3">
             <h2 class="text-2xl underline font-bold">2023-07-07</h2>
 
             <div class="flex flex-col gap-1">
                 <h3 class="text-xl font-bold">Features</h3>
                 <ul>
-                    <li>- <span class="font-bold text-red-500">NEW !</span> Added an optional enhancement trees randomizer, there is now even more random to your random character !</li>
+                    <li>- <span class="font-bold text-green-500">NEW !</span> Added an optional enhancement trees randomizer, there is now even more random to your random character !</li>
                 </ul>
             </div>
 

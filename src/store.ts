@@ -215,7 +215,6 @@ export const destinyTreesSelected: Readable<Data[]> = derived(
 
         let selected = Object.values($data.destiny_trees).filter((r: Data) => !r?.upcoming && (!r.core ? r?.selected : true))
 
-        console.log(selected);
         if (selected.length === 0) {
             return []
         }
