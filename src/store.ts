@@ -1,4 +1,4 @@
-import {derived, writable} from 'svelte/store';
+import {derived, get, writable} from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import type { Race } from "./routes/races/+server";
 import type { Class } from "./routes/classes/+server";
@@ -15,8 +15,6 @@ type DataProps = {
 type DataArray = {
     [index: string]: Array<Data>;
 }
-
-fetchStore('destiny_trees');
 
 export const data: Writable<any> = writable({})
 
@@ -189,8 +187,22 @@ export const universalTreesSelected: Readable<Data[]> = derived(
 
 export const hasAllUniversalTreesSelected: Readable<boolean> = derived(
     data,
-    ($data: any): boolean | any => {
-        return $data.universal_trees ? (Object.values($data.universal_trees).filter((tree: any) => tree.selected).length === $data.universal_trees.length) : false
+    ($data: DataArray): boolean | any => {
+        return $data.universal_trees ? (Object.values($data.universal_trees).filter((tree: Tree) => tree.selected).length === $data.universal_trees.length) : false
+    }
+);
+
+const toggeableDestinyTrees: Readable<Data[]> = derived(
+    data,
+    ($data: DataArray): Data[] => {
+        return $data.destiny_trees ? Object.values($data.destiny_trees).filter((tree : Tree) => !tree.core && !tree.upcoming) : [];
+    }
+);
+
+export const hasAllDestinyTreesSelected: Readable<boolean> = derived(
+    data,
+    ($data: DataArray): boolean | any => {
+        return $data.destiny_trees ? (get(toggeableDestinyTrees).filter((tree: Tree) => tree.selected).length === get(toggeableDestinyTrees).length) : false
     }
 );
 
@@ -201,8 +213,9 @@ export const destinyTreesSelected: Readable<Data[]> = derived(
             return []
         }
 
-        let selected = Object.values($data.destiny_trees).filter((r: Data) => !r?.upcoming)
+        let selected = Object.values($data.destiny_trees).filter((r: Data) => !r?.upcoming && (!r.core ? r?.selected : true))
 
+        console.log(selected);
         if (selected.length === 0) {
             return []
         }

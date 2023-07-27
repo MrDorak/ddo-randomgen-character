@@ -34,7 +34,6 @@
 
     let randomizeDestinyTrees = true;
     let destiny_tier5 = "no_destiny_tier5";
-    let desintyPoints = 60;
 
     let numberGen = [1, 2, 3];
 
@@ -103,6 +102,8 @@
             errors = [];
         }
 
+        let destinyPoints = 48 + $destinyTreesSelected.length;
+        
         let racesCopy : Array<Race> = JSON.parse(JSON.stringify($racesSelected));
         let alignmentCopy : Array<Alignment> = JSON.parse(JSON.stringify($alignmentsSelected));
         let classesCopy : Array<Class> = JSON.parse(JSON.stringify($classesSelected));
@@ -342,7 +343,6 @@
             }
         }
 
-
         if (chosenRace.statsMod) {
             Object.entries(chosenRace.statsMod).forEach(([idx, changes]) => {
                 changes.forEach(incr => {
@@ -525,7 +525,7 @@
                 let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
                 let attributed, picked_trees = [], randomNumber;
-                for (let pts = 1; pts <= desintyPoints; pts++) {
+                for (let pts = 1; pts <= destinyPoints; pts++) {
                     attributed = false;
                     randomNumber = maxCumulativeTreeWeight * Math.random();
 

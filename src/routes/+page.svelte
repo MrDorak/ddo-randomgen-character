@@ -1,15 +1,15 @@
 <script lang="ts">
+    import { browser } from "$app/environment";
+    import { writable } from "svelte/store";
+
     import Race from "$lib/components/Race.svelte";
     import Class from "$lib/components/Class.svelte";
     import Alignment from "$lib/components/Alignment.svelte";
     import StartingStats from "$lib/components/StartingStats.svelte";
     import Results from "$lib/components/Results.svelte";
-
-    import { browser } from "$app/environment";
-    import { writable } from "svelte/store";
-
     import UpdateNotes from "$lib/components/UpdateNotes.svelte";
     import UniversalTrees from "$lib/components/UniversalTrees.svelte";
+    import DestinyTrees from "$lib/components/DestinyTrees.svelte";
 
     const displayNames = writable(browser && JSON.parse(localStorage.getItem("displayNames")) !== null ? JSON.parse(localStorage.getItem("displayNames")) : true);
 
@@ -69,6 +69,8 @@
         <StartingStats />
 
         <UniversalTrees />
+
+        <DestinyTrees />
 
         <Results></Results>
     </div>
