@@ -13,6 +13,17 @@ let open = false;
 <Modal title="Update Notes" bind:open={open} autoclose outsideclose>
     <div class="flex flex-col gap-5 text-white">
         <div class="flex flex-col gap-2 bg-orange-700 rounded p-3">
+            <h2 class="text-2xl underline font-bold">2024-02-29</h2>
+
+            <div class="flex flex-col gap-1">
+                <h3 class="text-xl font-bold">Feature</h3>
+                <ul>
+                    <li>- Added the Dragon Lord archetype.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2 bg-gray-700 rounded p-3">
             <h2 class="text-2xl underline font-bold">2023-07-27</h2>
 
             <div class="flex flex-col gap-1">

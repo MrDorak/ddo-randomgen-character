@@ -283,6 +283,18 @@ const archetype_classes: Array<Class> = [
             { name : "Stormsinger", alias: "stormsinger", value: 0 },
         ]
     },
+    {
+        alias: "dragonlord",
+        name: "Dragon Lord",
+        selected: true,
+        isArchetype: true,
+        weightedStats: [ { name: "STR", value: 2 },  { name: "CHA", value: 2 }, ],
+        enhancementTrees: [
+            { name : "Stalwart Defender", alias: "stalwart_defender", value: 0 },
+            { name : "Dragon Lord", alias: "dragon_lord", value: 0 },
+            { name : "Ravager", alias: "ravager", value: 0 },
+        ]
+    },
 ]
 
 export function GET(): Response {

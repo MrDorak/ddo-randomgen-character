@@ -4,7 +4,7 @@
     import {fetchStore, hasAllFreeClassSelected, hasAllPremiumClassSelected, hasAllArchetypeClassSelected} from '../../store'
     import { writable } from "svelte/store";
 
-    export let displayNames
+    export let displayNames : boolean
 
     let [ data, loading, error ] = [ null, writable(true), null];
 

@@ -42,7 +42,7 @@ export async function fetchStore(url: string): Promise<(Writable<any> | Writable
 
     await get();
 
-    return [ data, loading, error, get]
+    return [ data, loading, error, get ]
 }
 
 export const racesSelected: Readable<Data[]> = derived(

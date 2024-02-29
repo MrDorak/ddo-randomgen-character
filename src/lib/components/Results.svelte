@@ -27,8 +27,14 @@
     import type { Race } from "../../routes/races/+server";
     import type { Class } from "../../routes/classes/+server";
 
-    let results = [];
-    let errors = [];
+    interface Stat {
+        name: string,
+        value: number,
+        weight: number
+    }
+
+    let results : any[] = [];
+    let errors : any[] = [];
 
     let randomizeEnhancementTrees = true;
     let capstone_tree = "no_capstone";
@@ -42,7 +48,7 @@
     let weight = "no_weight";
     const maxClasses = 3;
     const minClasses = 1;
-    const base_stats = [
+    const base_stats : Array<Stat> = [
         {name: 'STR', value: 8, weight: 1},
         {name: 'DEX', value: 8, weight: 1},
         {name: 'CON', value: 8, weight: 1},
@@ -55,7 +61,7 @@
     let minRacialPoints = 0;
     let maxRacialPoints = 14;
 
-    const handleRacial = ({ target }) => {
+    const handleRacial = ({ target } : any) => {
         if (parseInt(target.value) < minRacialPoints) {
             racialPoints = target.value = minRacialPoints;
             return;
@@ -73,14 +79,14 @@
     $: minDestinyPoints = 48 + $destinyTreesSelected.length;
     $: maxDestinyPoints = 62 + $destinyTreesSelected.length;
 
-    const handleDestiny = ({ target }) => {
+    const handleDestiny = ({ target } : any) => {
         if (parseInt(target.value) < minDestinyPoints) {
-            destinyPoints = target.value = parseInt(minDestinyPoints);
+            destinyPoints = target.value = minDestinyPoints;
             return;
         }
 
         if (parseInt(target.value) > maxDestinyPoints) {
-            destinyPoints = target.value = parseInt(maxDestinyPoints);
+            destinyPoints = target.value = maxDestinyPoints;
             return;
         }
 
@@ -89,16 +95,16 @@
 
     $: destinyTreesSelected && (destinyPoints = destinyPoints - 1 < minDestinyPoints ? minDestinyPoints : (destinyPoints > maxDestinyPoints ? maxDestinyPoints : destinyPoints));
 
-    const groupBy = (xs, key) => {
-        return xs.reduce((rv, x) => {
+    const groupBy = (xs: any, key: any) => {
+        return xs.reduce((rv: any, x: any) => {
             (rv[x[key]] = rv[x[key]] || []).push(x);
             return rv;
         }, {});
     };
 
-    const getStatMod = (stat) => {
+    const getStatMod = (stat: number) => {
         const mod = Math.floor((stat / 2) - 5);
-        return mod > 0 ? `+${mod}` : mod
+        return mod > 0 ? `+${mod}` : `${mod}`
     }
 
     const clearResults = () => {
@@ -152,12 +158,22 @@
         let raceIdx = Math.floor(Math.random() * racesCopy.length);
         let chosenRace : Race = racesCopy[raceIdx];
 
+        //check if random alignment can be applied to the selected classes
         classesCopy = filterAlignment(chosenAlignment.alias, classesCopy)
 
-        while (classesCopy.length === 0 || !classesCopy.some(tmp => tmp.alias === chosenRace?.forcedClass)) {
+        while (classesCopy.length === 0 || (chosenRace?.forcedClass && !classesCopy.some(tmp => tmp.alias === chosenRace?.forcedClass))) {
             alignmentCopy.splice(alignmentIdx, 1);
 
             if (alignmentCopy.length === 0) {
+                if (!chosenRace?.forcedClass) {
+                    errors = [...errors, {
+                        message: "No possible outcome for this configuration of class and alignment, please adjust it.",
+                        show: true,
+                        timer: 5
+                    }]
+                    return;
+                }
+
                 racesCopy.splice(raceIdx, 1);
                 raceIdx = Math.floor(Math.random() * racesCopy.length);
                 chosenRace = racesCopy[raceIdx];
@@ -169,10 +185,6 @@
                         timer: 5
                     }]
                     return;
-                }
-
-                if (!chosenRace?.forcedClass) {
-                    break;
                 }
 
                 classesCopy = JSON.parse(JSON.stringify($classesSelected));
@@ -201,18 +213,20 @@
         }
         let chosenClasses = [];
         let totalLvls = 20;
-        let levels, alias, name, enhancementTrees, weightedStats;
+        let levels, alias : string, name, enhancementTrees, weightedStats : any[] = [];
 
         for (let i = 1; i <= numberClasses; i++) {
             if (classesCopy.length === 0) break;
 
-            if (i === 1 && chosenRace?.forcedClass?.length > 0) {
+            if (i === 1 && chosenRace?.forcedClass && chosenRace.forcedClass.length > 0) {
                 alias = chosenRace.forcedClass;
                 const forcedClass = classesCopy.find(_class => _class.alias === alias);
 
-                name = chosenRace.forcedClassName;
-                weightedStats = forcedClass.weightedStats
-                enhancementTrees = forcedClass.enhancementTrees;
+                if (forcedClass) {
+                    name = chosenRace.forcedClassName;
+                    weightedStats = forcedClass.weightedStats;
+                    enhancementTrees = forcedClass.enhancementTrees;
+                }
             } else {
                 const classIdx = Math.floor(Math.random() * classesCopy.length);
                 alias = classesCopy[classIdx].alias;
@@ -308,7 +322,7 @@
         chosenClasses = chosenClasses.sort((a,b) => b.levels - a.levels)
         
         // 9-14 => 1pt ; 15-16 => 2pts ; 17-18 => 3pts. racials are applied AFTER.
-        let chosenStats = JSON.parse(JSON.stringify(base_stats));
+        let chosenStats : Array<Stat> = JSON.parse(JSON.stringify(base_stats));
         let startingStats = $selectedStartingStats;
         if (chosenRace.name === 'drow' && $selectedStartingStats !== '28') {
             startingStats = $selectedStartingStats - 4;
@@ -320,15 +334,17 @@
         if (weight !== 'no_weight') {
             chosenClasses.forEach((_class, idx) => {
                 if ((weight === 'weight_main' && idx === 0) || weight === 'weight_all') {
-                    _class.weightedStats.forEach(stat => {
-                        const statIndex = chosenStats.findIndex(baseStat => baseStat.name === stat.name)
-                        chosenStats[statIndex].weight += (stat.value - 1)
-                    })
+                    if (_class.weightedStats) {
+                        _class.weightedStats.forEach(stat => {
+                            const statIndex = chosenStats.findIndex(baseStat => baseStat.name === stat.name)
+                            chosenStats[statIndex].weight += (stat.value - 1)
+                        })
+                    }
                 }
             })
         }
 
-        let cumulativeWeights = [];
+        let cumulativeWeights : Array<number> = [];
         for (let i = 0; i < chosenStats.length; i += 1) {
             cumulativeWeights[i] = chosenStats[i].weight + (cumulativeWeights[i - 1] || 0);
         }
@@ -398,7 +414,7 @@
                 .map(({value}) => value)
                 .slice(0, Math.floor(Math.random() * (3 - 1 + 1) + 1));
 
-            let capstone_class_tree_idx = null, capstone_universal_tree_idx = null;
+            let capstone_class_tree_idx = -1, capstone_universal_tree_idx = -1;
             if (capstone_tree === "class_capstone") {
                 capstone_class_tree_idx = Math.floor(Math.random() * 3)
             } else if (capstone_tree === "universal_capstone") {
@@ -408,6 +424,8 @@
             chosenEnhancementTrees =
                 chosenClasses
                     .flatMap((_class, idx) => {
+                        if (!_class.enhancementTrees) { return [] }
+
                         _class.enhancementTrees
                             .map(value => ({ value, sort: Math.random() }))
                             .sort((a, b) => a.sort - b.sort)
@@ -477,13 +495,13 @@
             do {
                 copyEnhancementTrees = JSON.parse(JSON.stringify(chosenEnhancementTrees));
                 // calculate total tree weight
-                let cumulativeTreeWeights = [];
+                let cumulativeTreeWeights: number[] = [];
                 for (let i = 0; i < copyEnhancementTrees.length; i += 1) {
                     cumulativeTreeWeights[i] = copyEnhancementTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
                 }
                 let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
-                let attributed, picked_trees = [], randomNumber;
+                let attributed, picked_trees : any = [], randomNumber;
                 for (let pts = 1; pts <= enhancementPoints; pts++) {
                     attributed = false;
                     randomNumber = maxCumulativeTreeWeight * Math.random();
@@ -526,15 +544,15 @@
                         pts--;
                     }
                 }
-            } while(capstone_tree !== "no_capstone" && !copyEnhancementTrees.some(ce => ce.value === maxEnhancementTreeValue))
+            } while(capstone_tree !== "no_capstone" && !copyEnhancementTrees.some((ce: any) => ce.value === maxEnhancementTreeValue))
 
-            chosenEnhancementTrees = copyEnhancementTrees.filter(ct => ct.value !== 0 || ct.alias === "racial").sort((a,b) => b.value - a.value)
+            chosenEnhancementTrees = copyEnhancementTrees.filter((ct: any) => ct.value !== 0 || ct.alias === "racial").sort((a: any, b: any) => b.value - a.value)
         }
         
         let chosenDestinyTrees = [];
 
         if (randomizeDestinyTrees) {
-            let tier5_destiny_tree_idx = null;
+            let tier5_destiny_tree_idx : number = -1;
             if (destiny_tier5 === "destiny_tier5") {
                 tier5_destiny_tree_idx = Math.floor(Math.random() * 3)
             }
@@ -556,13 +574,13 @@
             do {
                 copyDestinyTrees = JSON.parse(JSON.stringify(chosenDestinyTrees));
                 // calculate total tree weight
-                let cumulativeTreeWeights = [];
+                let cumulativeTreeWeights : number[] = [];
                 for (let i = 0; i < copyDestinyTrees.length; i += 1) {
                     cumulativeTreeWeights[i] = copyDestinyTrees[i].weight + (cumulativeTreeWeights[i - 1] || 0);
                 }
                 let maxCumulativeTreeWeight = cumulativeTreeWeights[cumulativeTreeWeights.length - 1];
 
-                let attributed, picked_trees = [], randomNumber;
+                let attributed, picked_trees : any = [], randomNumber;
                 for (let pts = 1; pts <= destinyPoints; pts++) {
                     attributed = false;
                     randomNumber = maxCumulativeTreeWeight * Math.random();
@@ -590,6 +608,9 @@
                             copyDestinyTrees[itemIndex].value++;
                             attributed = true;
 
+                            if(copyDestinyTrees[itemIndex].alias !== "racial" && !picked_trees.includes(copyDestinyTrees[itemIndex].alias)) {
+                                picked_trees.push(copyDestinyTrees[itemIndex].alias);
+                            }
                             break;
                         }
                     }
@@ -598,9 +619,9 @@
                         pts--;
                     }
                 }
-            } while(destiny_tier5 === "destiny_tier5" && !copyDestinyTrees.some(ce => ce.value === maxDestinyTreeValue))
+            } while(destiny_tier5 === "destiny_tier5" && !copyDestinyTrees.some((ce: any) => ce.value === maxDestinyTreeValue))
 
-            chosenDestinyTrees = copyDestinyTrees.filter(ct => ct.value !== 0).sort((a,b) => b.value - a.value)
+            chosenDestinyTrees = copyDestinyTrees.filter((ct: any) => ct.value !== 0).sort((a: any, b: any) => b.value - a.value)
         }
 
         results = [{
@@ -613,7 +634,7 @@
         }, ...results]
     }
 
-    const timeout = idx => {
+    const timeout : TimerHandler = (idx : number) => {
         try {
             if (!errors[idx]?.timer) {
                 errors[idx].timer = 5;
@@ -634,16 +655,16 @@
         }
     }
 
-    const createBlobText = item => {
-        const classes = Object.entries(item.classes).map(([, _class]) => `${_class.levels} ${_class.name}`).join(" / ");
-        const stats = item.stats.map(stat => `${stat.name} : ${stat.value} (${getStatMod(stat.value)})`).join(" - ");
-        const enhancement_trees = Object.entries(item.enhancement_trees).map(([key, trees]) => `${key}: \n ${trees.map(stat => `\t${stat.name} : ${stat.value} point${stat.value > 1 ? 's' : ''}`).join("\n")}`).join("\n");
-        const destiny_trees = item.destiny_trees.map(tree => `${tree.name} : ${tree.value}`).join(" / ");
+    const createBlobText = (item: any) => {
+        const classes = Object.entries(item.classes).map(([, _class]: [string, any]) => `${_class.levels} ${_class.name}`).join(" / ");
+        const stats = item.stats.map((stat : Stat) => `${stat.name} : ${stat.value} (${getStatMod(stat.value)})`).join(" - ");
+        const enhancement_trees = Object.entries(item.enhancement_trees).map(([key, trees]: [string, any]) => `${key}: \n ${trees.map((stat : Stat) => `\t${stat.name} : ${stat.value} point${stat.value > 1 ? 's' : ''}`).join("\n")}`).join("\n");
+        const destiny_trees = item.destiny_trees.map((tree: any) => `${tree.name} : ${tree.value}`).join(" / ");
 
         return `${item.alignment} ${item.race}\n\n${classes}\n\n${stats}${enhancement_trees.length > 0 ? `\n\n${enhancement_trees}` : ''}${destiny_trees.length > 0 ? `\n\n${destiny_trees}` : ''}`;
     }
 
-    const download = item => {
+    const download = (item: any) => {
         var blob = new Blob([ createBlobText(item) ], { type: "txt" });
 
         var a = document.createElement('a');
@@ -683,7 +704,7 @@
                                 <div class="flex items-center">
                                     <input id="class_capstone" type="radio" bind:group={capstone_tree} value="class_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="class_capstone" class="w-full ml-2 text-sm font-medium">Class capstone</label>
-                                    <Badge color="black" rounded large class="!p-1 !font-semibold">
+                                    <Badge color="none" rounded large class="!p-1 !font-semibold">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                         </svg>
@@ -694,7 +715,7 @@
                                 <div class="flex items-center">
                                     <input id="universal_capstone" type="radio" bind:group={capstone_tree} value="universal_capstone" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="universal_capstone" class="w-full ml-2 text-sm font-medium">Universal capstone</label>
-                                    <Badge color="black" rounded large class="!p-1 !font-semibold">
+                                    <Badge color="dark" rounded large class="!p-1 !font-semibold">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                         </svg>
@@ -757,7 +778,7 @@
                                            bind:min="{ minDestinyPoints }"
                                            bind:max="{ maxDestinyPoints }"
                                            value={ destinyPoints }
-                                           on:change={ (e) => handleDestiny(e) }
+                                           on:change={ e => handleDestiny(e) }
                                     />
                                 </div>
                             </div>
@@ -843,7 +864,7 @@
                                 </svg>
                             </Badge>
                             <Popover transition={slide}>
-                                { @html item.stats.map(stat => `<span class="font-bold">${stat.name}</span> : ${stat.value} <span class="text-${getStatMod(stat.value) > 0 ? 'green' : 'red'}-400">(${getStatMod(stat.value)})</span>`).join(" - ") }
+                                { @html item.stats.map((stat) => `<span class="font-bold">${stat.name}</span> : ${stat.value} <span class="text-${getStatMod(stat.value).includes('+') ? 'green' : 'red'}-400">(${getStatMod(stat.value)})</span>`).join(" - ") }
                             </Popover>
                         </TableBodyCell>
                         <TableBodyCell class="text-center">
@@ -898,25 +919,6 @@
                             </div>
                         </TableBodyCell>
                     </TableBodyRow>
-
-                    <!--<Modal title="Enhancement trees" bind:open={item.enhancement_trees.open} size="xs" autoclose outsideclose>
-                        <div class="flex flex-col gap-2">
-                            {@html Object.entries(item.enhancement_trees.data).map(([key, trees]) => {
-                                return `<span class="flex flex-col"><span class="underline">${key}</span> ${trees.map(stat => `<span>${stat.name} : <span class="text-blue-400">${stat.value} point${stat.value > 1 ? 's' : ''}</span></span>`).join(" ")} </span>`
-                            }).join("")}
-                        </div>
-                        <svelte:fragment slot='footer'>
-                            <Button>Close</Button>
-                        </svelte:fragment>
-                    </Modal>
-                    <Modal title="Destiny trees" bind:open={item.destiny_trees.open} size="xs" autoclose outsideclose>
-                        <div class="flex flex-col">
-                            { @html item.destiny_trees.data.map(trees => `<div>${trees.name} : <span class="text-blue-400">${trees.value}</span></div>`).join("") }
-                        </div>
-                        <svelte:fragment slot='footer'>
-                            <Button>Close</Button>
-                        </svelte:fragment>
-                    </Modal>-->
                 {/each}
             </TableBody>
         </Table>
@@ -925,7 +927,7 @@
 
 <div class="fixed top-12 right-5 flex flex-col gap-3">
     {#each errors.filter(e => e) as error, i}
-        <Toast on:load={timeout(i)} divClass="w-full max-w-xs p-4 text-gray-500 bg-red-400 dark:bg-red-500 shadow text-slate-900 dark:text-white gap-3 border border-red-500"
+        <Toast on:load={ timeout(i) } divClass="w-full max-w-xs p-4 text-gray-500 bg-red-400 dark:bg-red-500 shadow text-slate-900 dark:text-white gap-3 border border-red-500"
                transition={slide}
                bind:open={error.show}
         >
