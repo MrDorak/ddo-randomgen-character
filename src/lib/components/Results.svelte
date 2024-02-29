@@ -115,7 +115,7 @@
         switch (alignment) {
             case 'lawful_good':
                 classes = classes.filter(function( _class : Class ) {
-                    return !["bard", "stormsinger", "barbarian", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.alias);
+                    return !["bard", "stormsinger", "barbarian", "druid", "blight_caster", "acolyte_of_the_skin"].includes(_class.alias);
                 })
                 break;
             case 'lawful_neutral':
@@ -130,7 +130,7 @@
                 break;
             case 'chaotic_good':
                 classes = classes.filter(function( _class ) {
-                    return !["monk", "paladin", "sacred_fist", "druid", "blightcaster", "acolyte_of_the_skin"].includes(_class.alias);
+                    return !["monk", "paladin", "sacred_fist", "druid", "blight_caster", "acolyte_of_the_skin"].includes(_class.alias);
                 })
                 break;
             default:
